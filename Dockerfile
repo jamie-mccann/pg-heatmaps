@@ -39,6 +39,6 @@ RUN rm -rf /app/plantgenie_heatmaps/pg-react-frontend
 RUN mkdir /app/plantgenie_heatmaps/pg-react-frontend
 COPY --from=frontend-builder /app/dist /app/plantgenie_heatmaps/pg-react-frontend/dist
 
-EXPOSE 8000
+EXPOSE 80
 
-CMD ["poetry", "run", "uvicorn", "plantgenie_heatmaps.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "plantgenie_heatmaps.main:app", "--host", "0.0.0.0", "--port", "80"]
