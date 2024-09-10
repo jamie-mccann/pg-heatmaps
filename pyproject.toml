@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "plantgenie-heatmaps"
+version = "0.1.0"
+description = ""
+authors = ["Jamie McCann <jamie.mccann@umu.se>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["standard"], version = "^0.114.0"}
+scipy = "^1.14.1"
+uvicorn = {extras = ["standard"], version = "^0.30.6"}
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.8.0"
+mypy = "^1.11.2"
+ruff = "^0.6.4"
+ipython = "^8.27.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
