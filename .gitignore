@@ -163,4 +163,3 @@ cython_debug/
 .idea/
 plantgenie_heatmaps/test_main.http
 plantgenie_heatmaps/pg-react-frontend/tsconfig.app.tsbuildinfo
-./plantgenie_heatmaps/pg-react-frontend/tsconfig.app.tsbuildinfo
