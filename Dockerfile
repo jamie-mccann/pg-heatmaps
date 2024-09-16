@@ -25,18 +25,19 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy only necessary files for Poetry install
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml poetry.lock README.md ./
+
 RUN pip install poetry && \
     poetry config virtualenvs.create false && \
-    poetry install --no-dev
+    poetry install --only main --no-root --no-directory
 
-# Copy FastAPI code and React build
 COPY plantgenie_heatmaps/ /app/plantgenie_heatmaps/
-COPY --from=frontend-builder /app/dist /app/plantgenie_heatmaps/pg-react-frontend/dist
+RUN poetry install --only-root
 
-# Remove unnecessary files
-RUN rm -rf /app/plantgenie_heatmaps/pg-react-frontend/tests
+# remove unnecessary react frontend folder (built in frontend-builder)
+RUN rm -rf /app/plantgenie_heatmaps/pg-react-frontend/{*,.*}
+# Copy over React build
+COPY --from=frontend-builder /app/dist /app/plantgenie_heatmaps/pg-react-frontend/dist
 
 EXPOSE 80
 
