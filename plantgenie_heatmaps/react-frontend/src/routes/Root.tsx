@@ -17,14 +17,15 @@ const Root = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const goButton = document.querySelector("#species-submit-button");
+    // const goButton = document.querySelector("#species-submit-button");
     const handleClickOutside = (event: MouseEvent) => {
       if (
         species && // Check if a species is selected
         !document
           .querySelector(`#species-card-${species}`)
           ?.contains(event.target as Node) &&
-          !goButton?.contains(event.target as Node)
+        // allow clicking on submit button without reset
+        !document.querySelector("#species-submit-button")?.contains(event.target as Node)
       ) {
         setSpecies(null); // Deselect species if clicked outside
       }

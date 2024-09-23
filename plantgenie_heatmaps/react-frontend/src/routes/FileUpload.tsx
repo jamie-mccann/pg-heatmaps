@@ -1,5 +1,6 @@
-import { MouseEvent } from "react";
+import { ChangeEvent, MouseEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { usePapaParse } from "react-papaparse";
 
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Button from "@mui/material/Button";
@@ -14,11 +15,27 @@ const FileUpload = () => {
   const file = useAppStore((state) => state.file);
   const setFile = useAppStore((state) => state.setFile);
   const navigate = useNavigate();
+  const { readString } = usePapaParse();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setFile(event.target.files[0]);
-      console.log(`file size = ${event.target.files[0].size}`);
+      const selectedFile = event.target.files[0];
+      setFile(selectedFile);
+      console.log(`file size = ${selectedFile.size}`);
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const fileContent = event.target?.result?.toString();
+        if (fileContent) {
+          readString(fileContent, {
+            header: false,
+            delimiter: "\n",
+            complete: (result) => console.log(result.data),
+            error: (error) => console.error("Error parsing file:", error),
+          });
+        }
+      };
+      reader.readAsText(selectedFile);
     }
   };
 
