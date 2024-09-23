@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 import {
   FilePickerSlice,
@@ -14,8 +15,13 @@ import {
 
 export const useAppStore = create<
   FilePickerSlice & SpeciesSelectSlice & ThemeControllerSlice
->()((...storeArgs) => ({
-  ...createFileSlice(...storeArgs),
-  ...createThemeControllerSlice(...storeArgs),
-  ...createSpeciesSelectSlice(...storeArgs),
-}));
+>()(
+  persist(
+    (...storeArgs) => ({
+      ...createFileSlice(...storeArgs),
+      ...createThemeControllerSlice(...storeArgs),
+      ...createSpeciesSelectSlice(...storeArgs),
+    }),
+    { name: "app-store" }
+  )
+);

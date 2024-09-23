@@ -1,5 +1,6 @@
-import { FilePickerSlice, SpeciesSelectSlice, ThemeControllerSlice } from "./SliceTypes";
 import { StateCreator } from "zustand";
+
+import { FilePickerSlice, SpeciesSelectSlice, ThemeControllerSlice } from "./SliceTypes";
 
 export const createFileSlice: StateCreator<
   FilePickerSlice,

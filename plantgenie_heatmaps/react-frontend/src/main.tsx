@@ -7,18 +7,8 @@ import { CssBaseline } from "@mui/material";
 
 import Root from "./routes/Root.tsx";
 import FileUpload from "./routes/FileUpload.tsx";
-
-const themeOptions: ThemeOptions = {
-  palette: {
-    mode: "light",
-    primary: {
-      main: "#312f38",
-    },
-    secondary: {
-      main: "#17990e",
-    },
-  },
-};
+import { useAppStore } from "./state/AppStore.ts";
+import GeneList from "./routes/GeneList.tsx";
 
 const router = createBrowserRouter([
   {
@@ -26,16 +16,39 @@ const router = createBrowserRouter([
     element: <Root />,
   },
   {
-    path: "/file-upload",
-    element: <FileUpload />
-  }
+    path: "/:speciesId/file-upload",
+    element: <FileUpload />,
+  },
+  {
+    path: "/:speciesId/gene-list",
+    element: <GeneList />,
+  },
 ]);
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
+const RootContainer = () => {
+  const theme = useAppStore((state) => state.style);
+  const themeOptions: ThemeOptions = {
+    palette: {
+      mode: theme,
+      primary: {
+        main: "#312f38",
+      },
+      secondary: {
+        main: "#17990e",
+      },
+    },
+  };
+
+  return (
     <ThemeProvider theme={createTheme(themeOptions)}>
       <CssBaseline />
       <RouterProvider router={router} />
     </ThemeProvider>
+  );
+};
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <RootContainer />
   </StrictMode>
 );

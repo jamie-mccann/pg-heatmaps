@@ -10,7 +10,7 @@ export interface ThemeControllerSlice {
 
 export interface SpeciesSelectSlice {
   species: string | null;
-  setSpecies: (newSpecies: string) => void;
+  setSpecies: (newSpecies: string | null) => void;
 }
 
 // class GeneAnnotation(BaseModel):
