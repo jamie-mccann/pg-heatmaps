@@ -4,14 +4,14 @@ import { usePapaParse } from "react-papaparse";
 
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Button from "@mui/material/Button";
-import CloseIcon from "@mui/icons-material/Close";
+// import CloseIcon from "@mui/icons-material/Close";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import { useAppStore } from "../state/AppStore";
 import { GeneListId } from "../state/SliceTypes";
-import { IconButton } from "@mui/material";
+// import { IconButton } from "@mui/material";
 
 const FileUpload = () => {
   const species = useAppStore((state) => state.species);

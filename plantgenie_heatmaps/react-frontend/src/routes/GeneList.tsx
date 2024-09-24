@@ -1,5 +1,5 @@
 import Grid from "@mui/material/Grid2";
-import Typography from "@mui/material/Typography";
+// import Typography from "@mui/material/Typography";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -27,7 +27,7 @@ interface ApiResponse {
 }
 
 const GeneList = () => {
-  const species = useAppStore((state) => state.species);
+  // const species = useAppStore((state) => state.species);
   const parsedIds = useAppStore((state) => state.parsedIds);
 
   const [data, setData] = useState<Result[]>([]);
@@ -72,6 +72,7 @@ const GeneList = () => {
   }, []);
 
   if (loading) return <p>Loading...</p>;
+
   if (error) return <p>Error: {error}</p>;
 
   return (

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigation } from "react-router-dom";
 
 // material ui imports
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
@@ -15,7 +14,6 @@ import { useAppStore } from "../state/AppStore";
 const AVAILABLE_SPECIES: string[] = ["Picea abies"];
 
 const SpeciesSelectMenu = () => {
-  const navigate = useNavigation();
   const species = useAppStore((state) => state.species);
   const setSpecies = useAppStore((state) => state.setSpecies);
 

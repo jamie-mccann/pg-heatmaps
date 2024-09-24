@@ -25,7 +25,7 @@ lazy_dataframes = {
 }
 
 app_path = Path(__file__).parent
-static_files_path = app_path / "pg-react-frontend" / "dist"
+static_files_path = app_path / "react-frontend" / "dist"
 
 app = FastAPI()
 app.add_middleware(
