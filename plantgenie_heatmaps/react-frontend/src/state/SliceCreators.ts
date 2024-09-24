@@ -9,7 +9,9 @@ export const createFileSlice: StateCreator<
   FilePickerSlice
 > = (set) => ({
   file: null,
-  setFile: (newFile) => set({ file: newFile }),
+  parsedIds: [],
+  setFile: (newFile: File | null) => set({ file: newFile }),
+  setParsedIds: (ids) => set({ parsedIds: ids })
 });
 
 export const createThemeControllerSlice: StateCreator<ThemeControllerSlice> = (

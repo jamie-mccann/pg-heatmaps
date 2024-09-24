@@ -1,6 +1,13 @@
+export interface GeneListId {
+  chromosomeId: string;
+  geneId: String;
+}
+
 export interface FilePickerSlice {
   file: File | null;
-  setFile: (newFile: File) => void;
+  parsedIds: GeneListId[];
+  setFile: (newFile: File | null) => void;
+  setParsedIds: (ids: GeneListId[]) => void;
 }
 
 export interface ThemeControllerSlice {

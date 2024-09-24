@@ -4,15 +4,19 @@ import { usePapaParse } from "react-papaparse";
 
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import Button from "@mui/material/Button";
+import CloseIcon from "@mui/icons-material/Close";
 import Grid from "@mui/material/Grid2";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
 import { useAppStore } from "../state/AppStore";
+import { GeneListId } from "../state/SliceTypes";
+import { IconButton } from "@mui/material";
 
 const FileUpload = () => {
   const species = useAppStore((state) => state.species);
   const file = useAppStore((state) => state.file);
+  const setParsedIds = useAppStore((state) => state.setParsedIds);
   const setFile = useAppStore((state) => state.setFile);
   const navigate = useNavigate();
   const { readString } = usePapaParse();
@@ -29,8 +33,19 @@ const FileUpload = () => {
         if (fileContent) {
           readString(fileContent, {
             header: false,
-            delimiter: "\n",
-            complete: (result) => console.log(result.data),
+            delimiter: ",",
+            skipEmptyLines: true,
+            complete: (result) => {
+              console.log(result.data);
+              const parsedData = (result.data as string[][]).map(
+                (row: string[]) =>
+                  ({
+                    chromosomeId: row[0].trim(),
+                    geneId: row[1].trim(),
+                  } as GeneListId)
+              );
+              setParsedIds(parsedData);
+            },
             error: (error) => console.error("Error parsing file:", error),
           });
         }
@@ -45,6 +60,9 @@ const FileUpload = () => {
 
   const handleGoButtonClick = (event: MouseEvent) => {
     event.preventDefault();
+    if (!file) {
+      return;
+    }
     navigate(`/${species}/gene-list`);
   };
 
@@ -70,10 +88,26 @@ const FileUpload = () => {
         </Typography>
         <TextField
           slotProps={{
-            input: { readOnly: true, startAdornment: <AttachFileIcon /> },
+            input: {
+              readOnly: true,
+              startAdornment: <AttachFileIcon />,
+              // endAdornment: file && (
+              //   <IconButton
+              //     onClick={(event: MouseEvent) => {
+              //       event.stopPropagation();
+              //       setFile(null);
+              //     }}
+              //     edge="end"
+              //   >
+              //     <CloseIcon />
+              //   </IconButton>
+              // ),
+            },
           }}
           label={null}
-          value={file ? file.name : "Upload a gene list"}
+          placeholder="Upload a gene list"
+          // value={file ? file.name : ""}
+          value={file?.name || ""}
           color="secondary"
           sx={{
             "& .MuiInputBase-input": {
@@ -102,6 +136,7 @@ const FileUpload = () => {
           variant="contained"
           color="secondary"
           onClick={handleGoButtonClick}
+          disabled={file ? false : true}
         >
           Go
         </Button>
