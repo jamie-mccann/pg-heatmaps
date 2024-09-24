@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -31,12 +31,12 @@ class ExpressionResponse(BaseModel):
 class GeneAnnotation(BaseModel):
     chromosome_id: str
     gene_id: str
-    genus: str
-    species: str
-    tool: str
-    annotation: str
-    evalue: float
-    score: float
+    genus: Optional[str]
+    species: Optional[str]
+    tool: Optional[str]
+    annotation: Optional[str]
+    evalue: Optional[float]
+    score: Optional[float]
 
 
 class GenesResponse(BaseModel):

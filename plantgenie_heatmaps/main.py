@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 
 import polars
-
-from fastapi import FastAPI
+from fastapi import FastAPI, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
@@ -18,19 +18,25 @@ from plantgenie_heatmaps.models import (
 )
 
 DATA_PATH = (
-    Path(os.environ.get("DATA_PATH"))
-    or Path(__file__).parent.parent / "example_data"
+    Path(os.environ.get("DATA_PATH")) or Path(__file__).parent.parent / "example_data"
 )
 lazy_dataframes = {
     x.stem: polars.scan_csv(x, separator="\t") for x in DATA_PATH.glob("*.tsv")
 }
 
-logger.info([x for x in lazy_dataframes])
-
 app_path = Path(__file__).parent
 static_files_path = app_path / "pg-react-frontend" / "dist"
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "*"
+    ],  # Allow all origins (change this to specific origins in production)
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 app.mount("/static", StaticFiles(directory=static_files_path), name="static")
 
@@ -50,12 +56,11 @@ async def api_root():
 
 @app.post("/api/expression_data")
 async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
-    expression_data_lazy = lazy_dataframes[
-        "conifer_networks_tpm_data_reformatted"
-    ]
+    expression_data_lazy = lazy_dataframes["conifer_networks_tpm_data_reformatted"]
     annotations_lazy = lazy_dataframes["picab_v2p0_gene_annotation_table"]
     species_lazy = lazy_dataframes["species_table"]
     request_pairs = polars.DataFrame(
+        # submitted gene ids must have a chromosome and gene identifier separated by "_"
         data=map(
             lambda s: ("_".join(s.split("_")[:-1]), s.split("_")[-1]),
             request.gene_ids,
@@ -103,10 +108,7 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
     )
 
     return ExpressionResponse(
-        results=[
-            ExpressionResult(**result)
-            for result in results.collect().to_dicts()
-        ]
+        results=[ExpressionResult(**result) for result in results.collect().to_dicts()]
     )
 
 
@@ -135,21 +137,18 @@ async def annotations_from_gene_list(request: GeneList) -> GenesResponse:
     )
 
     results = (
-        annotations.join(
-            request_pairs.lazy(), on=["chromosome_id", "gene_id"], how="inner"
-        )
-        .join(species, how="inner", on="species_id")
+        request_pairs.lazy()
+        .join(annotations, on=["chromosome_id", "gene_id"], how="left")
+        .join(species, on="species_id", how="left")
         .rename({"description": "annotation"})
         .select(columns)
         .collect()
         .to_dicts()
     )
 
-    return GenesResponse(
-        results=[GeneAnnotation(**result) for result in results]
-    )
+    return GenesResponse(results=[GeneAnnotation(**result) for result in results])
 
 
-@app.get("/api/clustering/")
-async def clustering():
+@app.post("/api/clustering")
+async def clustering(submitted_file: UploadFile):
     pass
