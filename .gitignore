@@ -165,3 +165,4 @@ plantgenie_heatmaps/test_main.http
 plantgenie_heatmaps/pg-react-frontend/tsconfig.app.tsbuildinfo
 example_data
 .vscode
+*.tsbuildinfo
