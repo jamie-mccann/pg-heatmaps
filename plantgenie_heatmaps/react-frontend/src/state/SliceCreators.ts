@@ -1,6 +1,10 @@
 import { StateCreator } from "zustand";
 
-import { FilePickerSlice, SpeciesSelectSlice, ThemeControllerSlice } from "./SliceTypes";
+import {
+  FilePickerSlice,
+  SpeciesSelectSlice,
+  ThemeControllerSlice,
+} from "./SliceTypes";
 
 export const createFileSlice: StateCreator<
   FilePickerSlice,
@@ -11,7 +15,7 @@ export const createFileSlice: StateCreator<
   file: null,
   parsedIds: [],
   setFile: (newFile: File | null) => set({ file: newFile }),
-  setParsedIds: (ids) => set({ parsedIds: ids })
+  setParsedIds: (ids) => set({ parsedIds: ids }),
 });
 
 export const createThemeControllerSlice: StateCreator<ThemeControllerSlice> = (
@@ -21,7 +25,9 @@ export const createThemeControllerSlice: StateCreator<ThemeControllerSlice> = (
   setStyle: (newStyle) => set({ style: newStyle }),
 });
 
-export const createSpeciesSelectSlice: StateCreator<SpeciesSelectSlice> = (set) => ({
+export const createSpeciesSelectSlice: StateCreator<SpeciesSelectSlice> = (
+  set
+) => ({
   species: null,
   setSpecies: (newSpecies) => set({ species: newSpecies }),
 });

@@ -22,7 +22,9 @@ const Root = () => {
         // species card was selected if true
         species &&
         // allow clicking on submit button without reset
-        !document.querySelector("#species-submit-button")?.contains(event.target as HTMLButtonElement)
+        !document
+          .querySelector("#species-submit-button")
+          ?.contains(event.target as HTMLButtonElement)
       ) {
         setSpecies(null); // Deselect species if clicked outside
       }
@@ -38,7 +40,7 @@ const Root = () => {
     if (speciesId === selectedCard) {
       setSelectedCard(null);
     } else {
-      setSelectedCard(speciesId); // This ensures only one card can be selected at a time
+      setSelectedCard(speciesId); // ensures only one card selected at a time
     }
     setSpecies(speciesId);
   };

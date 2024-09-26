@@ -94,7 +94,7 @@ const GeneList = () => {
           <TableBody>
             {data.map((value, index) => (
               <TableRow key={index}>
-                <TableCell>{index+1}</TableCell>
+                <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   {value.genus} {value.species}
                 </TableCell>

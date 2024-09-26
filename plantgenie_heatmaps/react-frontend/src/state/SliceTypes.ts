@@ -42,6 +42,6 @@ export interface GeneAnnotation {
 }
 
 export interface GeneListControllerSlice {
-  genes: GeneAnnotation[]
+  genes: GeneAnnotation[];
   setGenes: null;
 }

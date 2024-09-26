@@ -42,7 +42,7 @@ const FileUpload = () => {
                   ({
                     chromosomeId: row[0].trim(),
                     geneId: row[1].trim(),
-                  } as GeneListId)
+                  }) as GeneListId
               );
               setParsedIds(parsedData);
             },
