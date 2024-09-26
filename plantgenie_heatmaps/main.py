@@ -8,7 +8,6 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from loguru import logger
 
-
 from plantgenie_heatmaps.models import (
     ExpressionResponse,
     ExpressionResult,
@@ -17,9 +16,8 @@ from plantgenie_heatmaps.models import (
     GeneAnnotation,
 )
 
-DATA_PATH = (
-    Path(os.environ.get("DATA_PATH")) or Path(__file__).parent.parent / "example_data"
-)
+DATA_PATH = Path(os.environ.get("DATA_PATH")) or Path(__file__).parent.parent / "example_data"
+
 lazy_dataframes = {
     x.stem: polars.scan_csv(x, separator="\t") for x in DATA_PATH.glob("*.tsv")
 }
@@ -48,8 +46,10 @@ async def root():
 
 @app.get("/api")
 async def api_root():
-    message = {"message": "Hello from API!"}
-    message["data_files"] = [p.__str__() for p in DATA_PATH.glob("*")]
+    message = {
+        "message": "Hello from API!",
+        "data_files": [p.__str__() for p in DATA_PATH.glob("*")],
+    }
 
     return message
 
@@ -57,7 +57,7 @@ async def api_root():
 @app.post("/api/expression_data")
 async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
     expression_data_lazy = lazy_dataframes["conifer_networks_tpm_data_reformatted"]
-    annotations_lazy = lazy_dataframes["picab_v2p0_gene_annotation_table"]
+    annotations_lazy = lazy_dataframes["picab_v2p0_gene_annotation_unique_table"]
     species_lazy = lazy_dataframes["species_table"]
     request_pairs = polars.DataFrame(
         # submitted gene ids must have a chromosome and gene identifier separated by "_"
@@ -66,20 +66,15 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
             request.gene_ids,
         ),
         schema={"chromosome_id": polars.Utf8, "gene_id": polars.Utf8},
-    ).lazy()  # as lazy because the other ones are lazy too.
+    )
 
     results = (
-        expression_data_lazy.join(
-            request_pairs, on=["chromosome_id", "gene_id"], how="inner"
-        )
-        .join(
-            annotations_lazy.join(
-                request_pairs, on=["chromosome_id", "gene_id"], how="inner"
-            ),
-            how="inner",
-            on=["chromosome_id", "gene_id"],
-        )
+        request_pairs.lazy()  # required bc other DFs are lazy
+        .join(expression_data_lazy, on=["chromosome_id", "gene_id"], how="inner")
         .join(species_lazy, how="inner", on="species_id")
+        .join(
+            annotations_lazy, on=["chromosome_id", "gene_id", "species_id"], how="inner"
+        )
         .select(
             [
                 "chromosome_id",
@@ -105,6 +100,27 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
             }
         )
         .sort([polars.col("chromosome_id"), polars.col("gene_id")])
+        .collect()
+    )
+
+    gene_information = (
+        results
+        .group_by(polars.col("chromosome_id"), polars.col("gene_id"), maintain_order=True)
+        .agg([])
+        .to_dicts()
+    )
+
+    sample_information = (
+        results
+        .group_by(
+            polars.col("experiment_id"),
+            polars.col("replicate_id"),
+            polars.col("stub"),
+            polars.col("experiment_description"),
+            maintain_order=True
+        )
+        .agg([])
+        .to_dicts()
     )
 
     return ExpressionResponse(
@@ -114,7 +130,7 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
 
 @app.post("/api/genes")
 async def annotations_from_gene_list(request: GeneList) -> GenesResponse:
-    annotations = lazy_dataframes["picab_v2p0_gene_annotation_table"]
+    annotations = lazy_dataframes["picab_v2p0_gene_annotation_unique_table"]
     species = lazy_dataframes["species_table"]
 
     columns = [
