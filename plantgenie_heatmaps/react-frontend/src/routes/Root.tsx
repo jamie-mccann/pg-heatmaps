@@ -17,15 +17,12 @@ const Root = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // const goButton = document.querySelector("#species-submit-button");
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        species && // Check if a species is selected
-        !document
-          .querySelector(`#species-card-${species}`)
-          ?.contains(event.target as Node) &&
+        // species card was selected if true
+        species &&
         // allow clicking on submit button without reset
-        !document.querySelector("#species-submit-button")?.contains(event.target as Node)
+        !document.querySelector("#species-submit-button")?.contains(event.target as HTMLButtonElement)
       ) {
         setSpecies(null); // Deselect species if clicked outside
       }
@@ -35,7 +32,7 @@ const Root = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [species]);
+  }, [species, setSpecies]);
 
   const handleCardSelect = (speciesId: string) => {
     if (speciesId === selectedCard) {
@@ -130,7 +127,7 @@ const Root = () => {
               color="secondary"
               variant="contained"
               onClick={handleButtonClick}
-              disabled={species !== null ? false : true}
+              disabled={species === null}
               size="large"
             >
               Go
