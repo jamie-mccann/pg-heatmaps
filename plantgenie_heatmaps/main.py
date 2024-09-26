@@ -6,11 +6,9 @@ from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from loguru import logger
 
 from plantgenie_heatmaps.models import (
     ExpressionResponse,
-    ExpressionResult,
     GeneList,
     GenesResponse,
     GeneAnnotation,
@@ -124,7 +122,9 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
     )
 
     return ExpressionResponse(
-        results=[ExpressionResult(**result) for result in results.collect().to_dicts()]
+        genes=gene_information,
+        samples=sample_information,
+        values=results.select(polars.col("result")).to_series().to_list()
     )
 
 

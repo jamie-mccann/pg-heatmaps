@@ -7,25 +7,22 @@ class GeneList(BaseModel):
     gene_ids: List[str]
 
 
-class ExpressionResult(BaseModel):
+class GeneInfo(BaseModel):
     chromosome_id: str
     gene_id: str
-    genus: str
-    species: str
+
+
+class SampleInfo(BaseModel):
     experiment_id: str
     replicate_id: int
     stub: str
     experiment_description: str
-    result: float
-    result_type: str
-    tool: str
-    annotation: str
-    evalue: float
-    score: float
 
 
 class ExpressionResponse(BaseModel):
-    results: List[ExpressionResult]
+    genes: List[GeneInfo]
+    samples: List[SampleInfo]
+    values: List[float]
 
 
 class GeneAnnotation(BaseModel):
