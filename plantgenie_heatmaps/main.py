@@ -103,7 +103,11 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
 
     gene_information = (
         results
-        .group_by(polars.col("chromosome_id"), polars.col("gene_id"), maintain_order=True)
+        .group_by(
+            polars.col("chromosome_id"),
+            polars.col("gene_id"),
+            maintain_order=True
+        )
         .agg([])
         .to_dicts()
     )
