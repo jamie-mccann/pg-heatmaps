@@ -64,6 +64,8 @@ const HeatMap = () => {
     fetchData();
   }, []);
 
+  console.log(data, error, loading)
+
   return <p>Hello from Heatmap!</p>
 };
 
