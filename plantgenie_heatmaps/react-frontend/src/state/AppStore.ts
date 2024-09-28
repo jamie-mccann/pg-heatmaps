@@ -23,5 +23,5 @@ export const useAppStore = create<
       ...createSpeciesSelectSlice(...storeArgs),
     }),
     { name: "app-store" }
-  )
+  ),
 );

@@ -1,4 +1,4 @@
-import { ChangeEvent, MouseEvent } from "react";
+import { ChangeEvent, MouseEvent, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePapaParse } from "react-papaparse";
 
@@ -20,6 +20,7 @@ const FileUpload = () => {
   const setFile = useAppStore((state) => state.setFile);
   const navigate = useNavigate();
   const { readString } = usePapaParse();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -54,9 +55,12 @@ const FileUpload = () => {
     }
   };
 
-  const handleUploadClick = () => {
-    document.getElementById("fileInput")?.click();
-  };
+  const handleUploadClick = (event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (target.closest(".MuiInputBase-root")) {
+      inputRef.current?.click();
+    }
+  }
 
   const handleGoButtonClick = (event: MouseEvent) => {
     event.preventDefault();
@@ -69,7 +73,12 @@ const FileUpload = () => {
   return (
     <Grid container padding={2} justifyContent="center">
       <Grid sx={{ display: "none" }}>
-        <input id="fileInput" type="file" onChange={handleFileChange} />
+        <input
+          ref={inputRef}
+          id="fileInput"
+          type="file"
+          onChange={handleFileChange}
+        />
       </Grid>
       <Grid container flexDirection="column" alignItems="center" spacing={1}>
         <Typography variant="h4" textAlign="center">
@@ -106,7 +115,6 @@ const FileUpload = () => {
           }}
           label={null}
           placeholder="Upload a gene list"
-          // value={file ? file.name : ""}
           value={file?.name || ""}
           color="secondary"
           sx={{
@@ -120,13 +128,10 @@ const FileUpload = () => {
               "&:hover .MuiOutlinedInput-notchedOutline": {
                 borderColor: "green", // Change the color on hover
               },
-              "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "blue", // Border color when focused
-              },
             },
           }}
           helperText={
-            file
+            file?.size
               ? `File size: ${(file.size / 10 ** 6).toFixed(2)} MB`
               : "Choose a file to import."
           }
@@ -136,7 +141,8 @@ const FileUpload = () => {
           variant="contained"
           color="secondary"
           onClick={handleGoButtonClick}
-          disabled={file ? false : true}
+          disabled={!file}
+          // disabled={file ? false : true}
         >
           Go
         </Button>

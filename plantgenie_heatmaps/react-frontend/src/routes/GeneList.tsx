@@ -1,3 +1,4 @@
+import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
 // import Typography from "@mui/material/Typography";
 import Table from "@mui/material/Table";
@@ -10,6 +11,7 @@ import Paper from "@mui/material/Paper";
 
 import { useAppStore } from "../state/AppStore";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Result {
   chromosome_id: string;
@@ -27,14 +29,18 @@ interface ApiResponse {
 }
 
 const GeneList = () => {
-  // const species = useAppStore((state) => state.species);
+  const species = useAppStore((state) => state.species);
   const parsedIds = useAppStore((state) => state.parsedIds);
+  const attachedFile = useAppStore((state) => state.file);
+  const navigate = useNavigate();
 
   const [data, setData] = useState<Result[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (attachedFile === null) return;
+
     const fetchData = async () => {
       const url = "http://localhost:8080/api/genes";
       try {
@@ -66,10 +72,12 @@ const GeneList = () => {
       } finally {
         setLoading(false);
       }
+
+      return undefined;
     };
 
     fetchData();
-  }, []);
+  }, [parsedIds]);
 
   if (loading) return <p>Loading...</p>;
 
@@ -77,6 +85,7 @@ const GeneList = () => {
 
   return (
     <Grid container justifyContent="center" padding={2}>
+      <Button variant="contained" color="secondary" onClick={() => navigate(`/${species}/heatmap`)}>Show Heatmap</Button>
       <TableContainer component={Paper} sx={{ maxWidth: 992, width: "100%" }}>
         <Table>
           <TableHead>

@@ -9,6 +9,7 @@ import Root from "./routes/Root.tsx";
 import FileUpload from "./routes/FileUpload.tsx";
 import { useAppStore } from "./state/AppStore.ts";
 import GeneList from "./routes/GeneList.tsx";
+import HeatMap from "./routes/HeatMap.tsx";
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
     path: "/:speciesId/gene-list",
     element: <GeneList />,
   },
+  {
+    path: "/:speciesId/heatmap",
+    element: <HeatMap />
+  }
 ]);
 
 const RootContainer = () => {
