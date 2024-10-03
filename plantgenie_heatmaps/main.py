@@ -97,7 +97,12 @@ async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
                 "description_right": "annotation",
             }
         )
-        .sort([polars.col("chromosome_id"), polars.col("gene_id")])
+        .sort(
+            "chromosome_id",
+            "gene_id",
+            "experiment_id",
+            "replicate_id",
+        )
         .collect()
     )
 
