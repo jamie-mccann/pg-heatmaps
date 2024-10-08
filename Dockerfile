@@ -4,13 +4,13 @@ FROM node:20.17.0-alpine AS frontend-builder
 WORKDIR /app
 
 # Copy only package files to leverage Docker cache
-COPY plantgenie_heatmaps/react-frontend/package*.json ./
-COPY plantgenie_heatmaps/react-frontend/tsconfig.json ./
-COPY plantgenie_heatmaps/react-frontend/vite.config.ts ./
+COPY ./react-frontend/package.json ./
+COPY ./react-frontend/tsconfig.json ./
+COPY ./react-frontend/vite.config.ts ./
 
 # Install dependencies and build the frontend
-RUN yarn install --frozen-lockfile
-COPY plantgenie_heatmaps/react-frontend ./
+RUN yarn install --frozen-lockfile --force
+COPY ./react-frontend ./
 RUN yarn build
 
 # Stage 2: Set up the FastAPI backend with Poetry
