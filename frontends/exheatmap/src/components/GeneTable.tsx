@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import Checkbox from "@mui/material/Checkbox";
 import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -38,6 +39,7 @@ const GeneTable = ({
 }: GeneTableProps) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<boolean[]>([]);
 
   useEffect(() => {
     console.log(`Gene ids in GeneTable: ${geneIds.length}`);
@@ -63,6 +65,7 @@ const GeneTable = ({
 
         const result: GenesEndpointResponse = await response.json();
         setGeneAnnotations(result.results);
+        setSelected(result.results.map((_) => false));
       } catch (error) {
         setError(
           error instanceof Error
@@ -95,10 +98,32 @@ const GeneTable = ({
 
   return (
     <Grid>
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ maxHeight: 859 }}>
+        <Table stickyHeader size="medium">
           <TableHead>
             <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  color="secondary"
+                  checked={
+                    selected.filter((value) => value).length ===
+                      selected.length && selected.length > 0
+                  } // Fully checked if all are selected
+                  indeterminate={
+                    selected.filter((value) => value).length > 0 &&
+                    selected.filter((value) => value).length !== selected.length
+                  } // Indeterminate if some but not all are selected
+                  onChange={(event) => {
+                    if (event.target.checked) {
+                      // If checked, select all
+                      setSelected(selected.map(() => true));
+                    } else {
+                      // If unchecked, deselect all
+                      setSelected(selected.map(() => false));
+                    }
+                  }}
+                />
+              </TableCell>
               <TableCell>Number</TableCell>
               <TableCell>Species</TableCell>
               <TableCell>Chromosome ID</TableCell>
@@ -111,7 +136,30 @@ const GeneTable = ({
           </TableHead>
           <TableBody>
             {geneAnnotations.map((value, index) => (
-              <TableRow key={index}>
+              <TableRow
+                key={index}
+                hover
+                selected={selected[index] && value.evalue !== null}
+                onClick={() => {
+                  const newSelected = [...selected];
+                  newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
+                  setSelected(newSelected); // Update the state
+                }}
+                sx={{ cursor: 'pointer' }}
+              >
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    color="secondary"
+                    checked={selected[index] && value.evalue !== null}
+                    // checked={selected[index] || false} // Set checkbox checked state based on the selected array
+                    onChange={() => {
+                      const newSelected = [...selected];
+                      newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
+                      setSelected(newSelected); // Update the state
+                    }}
+                    disabled={value.evalue === null} // Disable checkbox if e-value is null
+                  />
+                </TableCell>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>
                   {value.genus} {value.species}
