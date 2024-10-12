@@ -30,15 +30,27 @@ const GeneTableDisplay = () => {
 
   return (
     <Grid container spacing={2}>
-      <Button variant="contained" onClick={() => navigate("/heatmap")}>Heatmap</Button>
-      <Button variant="contained" onClick={() => navigate("/network")}>Network</Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => navigate("/heatmap")}
+      >
+        Heatmap
+      </Button>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => navigate("/network")}
+      >
+        Network
+      </Button>
       <TableContainer component={Paper} sx={{ maxHeight: 859 }}>
         <Table stickyHeader size="medium">
           <TableHead>
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
-                  color="primary"
+                  color="secondary"
                   checked={
                     selected.filter((value) => value).length ===
                       selected.length && selected.length > 0
@@ -79,11 +91,11 @@ const GeneTableDisplay = () => {
                   newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
                   setSelected(newSelected); // Update the state
                 }}
-                sx={{ cursor: "pointer" }}
+                sx={{ cursor: "pointer", color: "secondary" }}
               >
                 <TableCell padding="checkbox">
                   <Checkbox
-                    color="primary"
+                    color="secondary"
                     checked={selected[index] && value.evalue !== null}
                     onChange={() => {
                       const newSelected = [...selected];

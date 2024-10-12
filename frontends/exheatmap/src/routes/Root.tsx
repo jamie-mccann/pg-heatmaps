@@ -48,8 +48,7 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
       formData.has("geneIds")
     )
   )
-    // throw an Error here to get error page instead of redirect
-    return redirect("/");
+    throw new Error("species, experiment and a gene list must be specified!");
 
   const geneIds = (formData.get("geneIds") as string)?.trim().split("\n");
   setGeneIds(geneIds);
@@ -75,7 +74,7 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
     throw new Error(`Error fetching data from ${url}`);
   }
 
-  const geneAnnotations = await response.json() as GeneAnnotationResponseBody;
+  const geneAnnotations = (await response.json()) as GeneAnnotationResponseBody;
 
   setGeneAnnotations(geneAnnotations.results as GeneAnnotation[]);
 
@@ -97,7 +96,7 @@ const Root = () => {
         {/* Sidebar */}
         <Grid size={{ xs: 12, sm: 7, md: 5, lg: 4, xl: 3 }} spacing={2}>
           <Paper
-            sx={{ backgroundColor: "lightgrey", padding: 2 }}
+            sx={{ backgroundColor: "darkgrey", padding: 2 }}
             variant="outlined"
           >
             <Grid container flexDirection="column" spacing={2}>
@@ -133,6 +132,7 @@ const Root = () => {
                       type="submit"
                       fullWidth
                       variant="contained"
+                      color="secondary"
                     >
                       Submit
                     </Button>
@@ -145,7 +145,13 @@ const Root = () => {
         {/* Main Content */}
 
         <Grid size={{ xs: 12, sm: 5, md: 7, lg: 8, xl: 9 }}>
-          <Outlet />
+          <Paper
+            sx={{ backgroundColor: "darkgrey", padding: 2 }}
+            variant="outlined"
+          >
+            <Outlet />
+          </Paper>
+
           {/* <Paper
             sx={{ backgroundColor: "lightgrey", padding: 2 }}
             variant="outlined"

@@ -40,12 +40,14 @@ const router = createBrowserRouter([
 const RootContainer = () => {
   const themeOptions: ThemeOptions = {
     palette: {
-      mode: "light",
+      mode: "dark",
       primary: {
-        main: "#312f38",
+        // main: "#312f38",
+        main: "#9EBF6D"
       },
       secondary: {
-        main: "#17990e",
+        // main: "#17990e",
+        main: "#8E6DBF"
       },
     },
   };
