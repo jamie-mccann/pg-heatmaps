@@ -65,7 +65,7 @@ const GeneTable = ({
 
         const result: GenesEndpointResponse = await response.json();
         setGeneAnnotations(result.results);
-        setSelected(result.results.map((_) => false));
+        setSelected(result.results.map((_) => true));
       } catch (error) {
         setError(
           error instanceof Error
@@ -104,7 +104,7 @@ const GeneTable = ({
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox
-                  color="secondary"
+                  color="primary"
                   checked={
                     selected.filter((value) => value).length ===
                       selected.length && selected.length > 0
@@ -145,13 +145,12 @@ const GeneTable = ({
                   newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
                   setSelected(newSelected); // Update the state
                 }}
-                sx={{ cursor: 'pointer' }}
+                sx={{ cursor: "pointer" }}
               >
                 <TableCell padding="checkbox">
                   <Checkbox
-                    color="secondary"
+                    color="primary"
                     checked={selected[index] && value.evalue !== null}
-                    // checked={selected[index] || false} // Set checkbox checked state based on the selected array
                     onChange={() => {
                       const newSelected = [...selected];
                       newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
