@@ -29,8 +29,12 @@ const GeneTableDisplay = () => {
   );
 
   useEffect(() => {
-    if (geneAnnotations.length === 0) navigate("/")
-  }, [geneAnnotations, navigate])
+    // we want to redirect to the "/" route if the user refreshes the page
+    if (geneAnnotations.length === 0) navigate("/");
+    // need to reset selected for geneAnnotations somehow
+    // when submit button is clicked in the /gene-list route
+    // either that or disable the submit button /gene-list
+  }, [geneAnnotations, navigate]);
 
   return (
     <Grid container spacing={2}>
@@ -92,7 +96,9 @@ const GeneTableDisplay = () => {
                 selected={selected[index] && value.evalue !== null}
                 onClick={() => {
                   const newSelected = [...selected];
-                  newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
+                  if (value.evalue !== null) {
+                    newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
+                  }
                   setSelected(newSelected); // Update the state
                 }}
                 sx={{ cursor: "pointer", color: "secondary" }}
