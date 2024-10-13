@@ -96,7 +96,7 @@ const Root = () => {
         {/* Sidebar */}
         <Grid size={{ xs: 12, sm: 7, md: 5, lg: 4, xl: 3 }} spacing={2}>
           <Paper
-            sx={{ backgroundColor: "darkgrey", padding: 2 }}
+            sx={{ backgroundColor: "#2E3135", padding: 2 }}
             variant="outlined"
           >
             <Grid container flexDirection="column" spacing={2}>
@@ -146,7 +146,7 @@ const Root = () => {
 
         <Grid size={{ xs: 12, sm: 5, md: 7, lg: 8, xl: 9 }}>
           <Paper
-            sx={{ backgroundColor: "darkgrey", padding: 2 }}
+            sx={{ backgroundColor: "#2E3135", padding: 2 }}
             variant="outlined"
           >
             <Outlet />

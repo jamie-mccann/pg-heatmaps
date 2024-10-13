@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -27,6 +27,10 @@ const GeneTableDisplay = () => {
   const [selected, setSelected] = useState<boolean[]>(
     geneAnnotations.map((_) => true)
   );
+
+  useEffect(() => {
+    if (geneAnnotations.length === 0) navigate("/")
+  }, [geneAnnotations, navigate])
 
   return (
     <Grid container spacing={2}>
