@@ -51,7 +51,7 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
     throw new Error("species, experiment and a gene list must be specified!");
 
   if ((formData.get("geneIds") as string).trim() === "") {
-    return redirect("/")
+    return redirect("/");
   }
 
   const geneIds = (formData.get("geneIds") as string)?.trim().split("\n");
