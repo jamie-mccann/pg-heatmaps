@@ -11,16 +11,24 @@ import Typography from "@mui/material/Typography";
 // ...
 
 const experimentsBySpecies: { [key: string]: string[] } = {
-  "Picea abies": ["Growth Study", "Water Stress Test", "Genetic Analysis"],
+  "Picea abies": [
+    "Cold Stress Needles",
+    "Cold Stress Roots",
+    "Drought Stress Needles",
+    "Drought Stress Roots",
+    "Seasonal Needles",
+    "Seasonal Wood",
+  ],
   "Pinus sylvestris": [
-    "Soil Acidity Response",
-    "Carbon Uptake",
-    "Needle Density Analysis",
+    "Cold Stress Needles",
+    "Cold Stress Roots",
+    "Drought Stress Needles",
+    "Drought Stress Roots",
   ],
   "Populus tremula": [
-    "Light Response Test",
-    "Drought Resistance Study",
-    "Root Structure Analysis",
+    // "Light Response Test",
+    // "Drought Resistance Study",
+    // "Root Structure Analysis",
   ],
 };
 

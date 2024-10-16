@@ -48,6 +48,7 @@ const GeneTableDisplay = () => {
       <Button
         variant="contained"
         color="secondary"
+        disabled
         onClick={() => navigate("/network")}
       >
         Network

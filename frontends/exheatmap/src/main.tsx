@@ -1,7 +1,7 @@
-import "@fontsource/roboto/300.css";
-import "@fontsource/roboto/400.css";
-import "@fontsource/roboto/500.css";
-import "@fontsource/roboto/700.css";
+import "@fontsource/roboto/latin-300.css";
+import "@fontsource/roboto/latin-400.css";
+import "@fontsource/roboto/latin-500.css";
+import "@fontsource/roboto/latin-700.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -15,6 +15,8 @@ import Index from "./routes/Index";
 import GeneTableDisplay, {
   loader as geneTableLoader,
 } from "./routes/GeneTableDisplay";
+
+import Heatmap from "./routes/Heatmap";
 
 const router = createBrowserRouter([
   {
@@ -30,7 +32,7 @@ const router = createBrowserRouter([
       },
       {
         path: "heatmap",
-        element: <div>Heatmap</div>,
+        element: <Heatmap />,
       },
       { path: "network", element: <div>Network</div> },
     ],

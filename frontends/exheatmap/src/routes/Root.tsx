@@ -147,7 +147,6 @@ const Root = () => {
           </Paper>
         </Grid>
         {/* Main Content */}
-
         <Grid size={{ xs: 12, sm: 5, md: 7, lg: 8, xl: 9 }}>
           <Paper
             sx={{ backgroundColor: "#2E3135", padding: 2 }}
@@ -155,21 +154,6 @@ const Root = () => {
           >
             <Outlet />
           </Paper>
-
-          {/* <Paper
-            sx={{ backgroundColor: "lightgrey", padding: 2 }}
-            variant="outlined"
-          >
-            <Grid container flexDirection="column" spacing={2}>
-              <Paper>
-                <GeneTable
-                  geneIds={geneIds}
-                  geneAnnotations={geneAnnotations}
-                  setGeneAnnotations={setGeneAnnotations}
-                />
-              </Paper>
-            </Grid>
-          </Paper> */}
         </Grid>
       </Grid>
       {/* Footer */}
