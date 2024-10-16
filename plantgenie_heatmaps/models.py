@@ -4,6 +4,8 @@ from pydantic import BaseModel
 
 
 class GeneList(BaseModel):
+    species: str
+    experiment: str
     gene_ids: List[str]
 
 
