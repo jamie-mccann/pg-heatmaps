@@ -37,7 +37,7 @@ RUN poetry install --only-root
 # remove unnecessary react frontend folder (built in frontend-builder)
 RUN rm -rf /app/plantgenie_heatmaps/react-frontend/{*,.*}
 # Copy over React build
-COPY --from=frontend-builder /app/dist /app/plantgenie_heatmaps/react-frontend/dist
+COPY --from=frontend-builder /app/dist /app/react-frontend/dist
 
 EXPOSE 80
 

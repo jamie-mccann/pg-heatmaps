@@ -12,6 +12,8 @@ scipy = "^1.14.1"
 uvicorn = {extras = ["standard"], version = "^0.30.6"}
 polars = "^1.7.1"
 loguru = "^0.7.2"
+duckdb = "^1.1.2"
+pyarrow = "^17.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
