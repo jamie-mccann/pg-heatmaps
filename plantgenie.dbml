@@ -1,0 +1,86 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+
+Table study {
+  id integer [primary key]
+  category_id integer
+  sequencing_id integer [null]
+  relation_id integer [note: 'Full SQL path to table, used for queries']
+  name varchar
+  description varchar
+  published bool
+  publication_date date
+  doi varchar
+}
+
+Table experiment_tables {
+  id integer [primary key]
+  relation_path varchar
+  columns varchar[]
+}
+
+Table study_categories {
+  id integer [primary key]
+  name varchar [note: 'Name of experiment type like RNASeq/Expression']
+  description varchar
+}
+
+Table tissue_categories {
+  id integer [primary key]
+  name varchar [note: "all, unspecified, needle, leaves, roots"]
+  description varchar
+}
+
+Table sequencing_experiment {
+  id integer [primary key]
+  species_id integer
+  tissue_id integer
+  sample_id varchar
+  sequencing_id varchar
+  number_of_reads integer
+  sequencing_type varchar [note: "e.g. Illumina, PacBio, Nanopore, etc"]
+}
+
+Table genomes {
+  id integer [primary key]
+  species_id integer
+  version varchar
+  published bool
+  publication_date date
+  doi varchar
+}
+
+Table genome_annotation {
+  id integer [primary key]
+  genome_id integer
+  chromosome_id varchar
+  gene_id varchar
+  tool varchar
+  evalue double
+  score bigint [note: "datatype is int64 in duckdb"]
+  seed_ortholog varchar [note: "if available, can be null"]
+  description varchar [note: "the annotation of the gene from the tool"]
+}
+
+Table species {
+  id integer [primary key]
+  genus varchar
+  species varchar
+  additional varchar
+  full varchar [note: "maybe full name for varieties, crosses?"]
+}
+
+Ref: study.relation_id > experiment_tables.id
+
+Ref: genome_annotation.genome_id > genomes.id
+
+Ref: sequencing_experiment.species_id > species.id
+
+Ref: genomes.species_id > species.id
+
+Ref: study.category_id > study_categories.id
+
+Ref: study.sequencing_id > sequencing_experiment.id
+
+Ref: sequencing_experiment.tissue_id > tissue_categories.id

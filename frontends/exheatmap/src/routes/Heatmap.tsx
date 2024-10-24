@@ -1,34 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import Paper from "@mui/material/Paper";
 
 import { range } from "d3";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 
+import { useAppStore } from "../state/AppStore.ts";
+import {
+  ExperimentTitleToId,
+  ExpressionRequest,
+  ExpressionResponse,
+} from "../models.ts";
 import {
   useHeatMapRectangles,
   useMaxTextLengths,
 } from "../hooks/useHeatmap.ts";
-import { useAppStore } from "../state/AppStore.ts";
-import Paper from "@mui/material/Paper";
-import { useNavigate } from "react-router-dom";
-
-interface ExpressionGene {
-  chromosome_id: string;
-  gene_id: string;
-}
-
-interface ExpressionSample {
-  experiment_id: string;
-  replicate_id: number;
-  stub: string;
-  experiment_description: string;
-}
-
-interface ExpressionResults {
-  genes: ExpressionGene[];
-  samples: ExpressionSample[];
-  values: number[];
-}
 
 interface HeatMapProps {
   svgWidth: number;
@@ -45,10 +33,12 @@ interface HeatMapProps {
 const Heatmap = () => {
   const navigate = useNavigate();
   const [expressionData, setExpressionData] =
-    useState<ExpressionResults | null>(null);
+    useState<ExpressionResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const geneAnnotations = useAppStore((state) => state.geneAnnotations);
+  const species = useAppStore((state) => state.species);
+  const experiment = useAppStore((state) => state.experiment);
 
   const heatMapSettings: HeatMapProps = {
     svgHeight: 2500,
@@ -67,8 +57,20 @@ const Heatmap = () => {
   useEffect(() => {
     // we want to redirect to the "/" route if the user refreshes the page
     if (geneAnnotations.length === 0) navigate("/");
+
+    if (species === null) navigate("/");
+
+    const requestBody: ExpressionRequest = {
+      species: species!, // species has to be set here, no?
+      clustering: "none",
+      experimentId: ExperimentTitleToId[`${species} ${experiment}`],
+      geneIds: geneAnnotations.map(
+        (value) => `${value.chromosomeId}_${value.geneId}`
+      ),
+    };
+
     const fetchData = async () => {
-      const url = "http://localhost:8080/api/expression_data";
+      const url = "http://localhost:8080/api/expression";
 
       try {
         const response = await fetch(url, {
@@ -77,13 +79,7 @@ const Heatmap = () => {
             Accept: "application/json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            species: "Picea abies", // TODO: set in zustand app store
-            experiment: "blahdy blah blah", // TODO: set in zustand app store
-            gene_ids: geneAnnotations.map(
-              (value) => `${value.chromosome_id}_${value.gene_id}`
-            ),
-          }),
+          body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -93,9 +89,8 @@ const Heatmap = () => {
           } as Error;
         }
 
-        const result: ExpressionResults = await response.json();
+        const result: ExpressionResponse = await response.json();
         setExpressionData(result);
-        console.log(result);
       } catch (error) {
         setError(
           error instanceof Error ? error.message : "Unknown error occurred"
@@ -113,12 +108,12 @@ const Heatmap = () => {
     svgReference: heatmapSvgRef,
     rowLabels: expressionData
       ? expressionData.genes.map(
-          (value) => `${value.chromosome_id}_${value.gene_id}`
+          (value) => `${value.chromosomeId}_${value.geneId}`
         )
       : [],
     colLabels: expressionData
       ? expressionData.samples.map(
-          (value) => `${value.experiment_id}_${value.stub}`
+          (value) => `${value.experiment}_${value.sampleId}`
         )
       : [],
     labelFontSize: heatMapSettings.labelFontSize,
@@ -201,7 +196,7 @@ const Heatmap = () => {
       .attr("font-weight", "normal")
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
-      .text((d) => `${d.chromosome_id}_${d.gene_id}`)
+      .text((d) => `${d.chromosomeId}_${d.geneId}`)
       .on("mouseenter", function () {
         select(this).transition().duration(300).attr("font-weight", "bold");
       })
@@ -235,7 +230,7 @@ const Heatmap = () => {
       .attr("fill", "white")
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
-      .text((d) => `${d.experiment_id}_${d.stub}`)
+      .text((d) => `${d.experiment}_${d.sampleId}`)
       .on("mouseenter", function () {
         select(this).transition().duration(300).attr("font-weight", "bold");
       })
@@ -243,7 +238,7 @@ const Heatmap = () => {
         select(this).transition().duration(300).attr("font-weight", "normal");
       })
       .append("title")
-      .text((d) => `${d.experiment_description}`);
+      .text((d) => `${d.condition}`);
   }, [heatmapSvgRef, expressionData, rowTextLength, colTextLength]);
 
   return (

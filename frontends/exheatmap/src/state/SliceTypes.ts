@@ -1,12 +1,10 @@
-export interface GeneAnnotation {
-  chromosome_id: string;
-  gene_id: string;
-  genus: string;
-  species: string;
-  tool: string;
-  annotation: string;
-  evalue: number;
-  score: number;
+import { GeneAnnotation } from "../models";
+
+export interface HeatmapSlice {
+  species: string | null;
+  experiment: string | null;
+  setSpecies: (newSpecies: string | null) => void;
+  setExperiment: (newExperiment: string | null) => void;
 }
 
 export interface GenesSlice {

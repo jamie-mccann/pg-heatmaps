@@ -15,7 +15,7 @@ import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 
 import { useAppStore } from "../state/AppStore";
 
-import { GeneAnnotation } from "../state/SliceTypes";
+import { GeneAnnotation } from "../models";
 
 export const loader: LoaderFunction = (): GeneAnnotation[] => {
   return useAppStore.getState().geneAnnotations;
@@ -120,10 +120,10 @@ const GeneTableDisplay = () => {
                 <TableCell>
                   {value.genus} {value.species}
                 </TableCell>
-                <TableCell>{value.chromosome_id}</TableCell>
-                <TableCell>{value.gene_id}</TableCell>
+                <TableCell>{value.chromosomeId}</TableCell>
+                <TableCell>{value.geneId}</TableCell>
                 <TableCell>{value.tool}</TableCell>
-                <TableCell>{value.annotation}</TableCell>
+                <TableCell>{value.description}</TableCell>
                 <TableCell>{value.evalue?.toPrecision(3)}</TableCell>
                 <TableCell>{value.score}</TableCell>
               </TableRow>

@@ -11,20 +11,8 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
-export interface GeneAnnotation {
-  chromosome_id: string;
-  gene_id: string;
-  genus: string;
-  species: string;
-  tool: string;
-  annotation: string;
-  evalue: number;
-  score: number;
-}
+import { AnnotationsResponse, GeneAnnotation } from "../models";
 
-export interface GenesEndpointResponse {
-  results: GeneAnnotation[];
-}
 
 interface GeneTableProps {
   geneIds: string[];
@@ -63,7 +51,7 @@ const GeneTable = ({
           throw new Error(`Error fetching data from ${url}`);
         }
 
-        const result: GenesEndpointResponse = await response.json();
+        const result: AnnotationsResponse = await response.json();
         setGeneAnnotations(result.results);
         setSelected(result.results.map((_) => true));
       } catch (error) {
@@ -163,10 +151,10 @@ const GeneTable = ({
                 <TableCell>
                   {value.genus} {value.species}
                 </TableCell>
-                <TableCell>{value.chromosome_id}</TableCell>
-                <TableCell>{value.gene_id}</TableCell>
+                <TableCell>{value.chromosomeId}</TableCell>
+                <TableCell>{value.geneId}</TableCell>
                 <TableCell>{value.tool}</TableCell>
-                <TableCell>{value.annotation}</TableCell>
+                <TableCell>{value.description}</TableCell>
                 <TableCell>{value.evalue?.toPrecision(3)}</TableCell>
                 <TableCell>{value.score}</TableCell>
               </TableRow>

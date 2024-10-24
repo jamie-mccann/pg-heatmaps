@@ -1,26 +1,30 @@
 import os
 from pathlib import Path
 
-import polars
-from fastapi import FastAPI, UploadFile
+import duckdb
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from plantgenie_heatmaps.models import (
+    AnnotationsRequest,
+    AnnotationsResponse,
+    ExpressionRequest,
     ExpressionResponse,
-    GeneList,
-    GenesResponse,
     GeneAnnotation,
+    GeneInfo,
+    SampleInfo,
 )
 
-DATA_PATH = Path(os.environ.get("DATA_PATH")) or Path(__file__).parent.parent / "example_data"
+DATA_PATH = (
+    Path(os.environ.get("DATA_PATH")) or Path(__file__).parent.parent / "example_data"
+)
 
-lazy_dataframes = {
-    x.stem: polars.scan_csv(x, separator="\t") for x in DATA_PATH.glob("*.tsv")
-}
+DATABASE_PATH = DATA_PATH / "upsc-plantgenie.db"
 
-app_path = Path(__file__).parent
+app_path = Path(__file__).parent.parent
 static_files_path = app_path / "react-frontend" / "dist"
 
 app = FastAPI()
@@ -52,128 +56,107 @@ async def api_root():
     return message
 
 
-@app.post("/api/expression_data")
-async def get_gene_expression_data(request: GeneList) -> ExpressionResponse:
-    expression_data_lazy = lazy_dataframes["conifer_networks_tpm_data_reformatted"]
-    annotations_lazy = lazy_dataframes["picab_v2p0_gene_annotation_unique_table"]
-    species_lazy = lazy_dataframes["species_table"]
-    request_pairs = polars.DataFrame(
-        # submitted gene ids must have a chromosome and gene identifier separated by "_"
-        data=map(
-            lambda s: ("_".join(s.split("_")[:-1]), s.split("_")[-1]),
-            request.gene_ids,
-        ),
-        schema={"chromosome_id": polars.Utf8, "gene_id": polars.Utf8},
+@app.post("/api/annotations")
+async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResponse:
+    gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
+
+    # build query template with (?, ?) for each gene_id
+    query = (
+        "SELECT * FROM annotations WHERE (chromosome_id, gene_id) IN ("
+        + ", ".join(["(?, ?)"] * len(request.gene_ids))
+        + ")"
     )
 
-    results = (
-        request_pairs.lazy()  # required bc other DFs are lazy
-        .join(expression_data_lazy, on=["chromosome_id", "gene_id"], how="inner")
-        .join(species_lazy, how="inner", on="species_id")
-        .join(
-            annotations_lazy, on=["chromosome_id", "gene_id", "species_id"], how="inner"
-        )
-        .select(
-            [
-                "chromosome_id",
-                "gene_id",
-                "genus",
-                "species",
-                "experiment_id",
-                "replicate_id",
-                "stub",
-                "description",
-                "result",
-                "result_type",
-                "tool",
-                "description_right",
-                "evalue",
-                "score",
-            ]
-        )
-        .rename(
-            {
-                "description": "experiment_description",
-                "description_right": "annotation",
-            }
-        )
-        .sort(
+    # with duckdb.connect(DATABASES[request.species], read_only=True) as connection:
+    with duckdb.connect(DATABASE_PATH, read_only=True) as connection:
+        query_relation = connection.sql(
+            query=query,
+            params=[
+                value
+                for gene in gene_ids
+                for value in (gene.chromosome_id, gene.gene_id)
+            ],
+        ).project(  # we don't need id or genome_id here
             "chromosome_id",
             "gene_id",
-            "experiment_id",
-            "replicate_id",
+            "tool",
+            "evalue",
+            "score",
+            "seed_ortholog",
+            "description",
         )
-        .collect()
-    )
 
-    gene_information = (
-        results
-        .group_by(
-            polars.col("chromosome_id"),
-            polars.col("gene_id"),
-            maintain_order=True
+        return AnnotationsResponse(
+            results=[
+                GeneAnnotation(
+                    # zip the GeneAnnotation fields with the row tuple - match order in query!
+                    **{k: v for k, v in zip(GeneAnnotation.model_fields.keys(), result)}
+                )
+                for result in query_relation.fetchall()
+            ]
         )
-        .agg([])
-        .to_dicts()
-    )
 
-    sample_information = (
-        results
-        .group_by(
-            polars.col("experiment_id"),
-            polars.col("replicate_id"),
-            polars.col("stub"),
-            polars.col("experiment_description"),
-            maintain_order=True
+
+@app.post("/api/expression")
+async def get_expression_duckdb(request: ExpressionRequest) -> ExpressionResponse:
+    gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
+
+    with duckdb.connect(DATABASE_PATH, read_only=True) as connection:
+        experiment = (
+            connection.sql(
+                "SELECT * FROM experiments WHERE id = ?", params=[request.experiment_id]
+            )
+            .project("relation_name")
+            .fetchone()[0]
         )
-        .agg([])
-        .to_dicts()
-    )
 
-    return ExpressionResponse(
-        genes=gene_information,
-        samples=sample_information,
-        values=results.select(polars.col("result")).to_series().to_list()
-    )
+        query = (
+            f"SELECT * FROM ("
+            f"SELECT * FROM {experiment} WHERE (chromosome_id, gene_id) IN ("
+            + ", ".join(["(?, ?)"] * len(gene_ids))
+            + ")) AS l "
+            "JOIN samples AS r ON (l.sample_id = r.id)"
+        )
 
+        query_relation = connection.sql(
+            query=query,
+            params=[
+                value
+                for gene in gene_ids
+                for value in (gene.chromosome_id, gene.gene_id)
+            ],
+        )
 
-@app.post("/api/genes")
-async def annotations_from_gene_list(request: GeneList) -> GenesResponse:
-    annotations = lazy_dataframes["picab_v2p0_gene_annotation_unique_table"]
-    species = lazy_dataframes["species_table"]
+        samples = [
+            SampleInfo(
+                experiment=experiment,
+                sample_id=sample[0],
+                sequencing_id=sample[1],
+                condition=sample[2],
+            )
+            for sample in query_relation.project(
+                "reference", "sample_filename", "condition", "sample_id"
+            )
+            .distinct()
+            .order("sample_id")
+            .fetchall()
+        ]
 
-    columns = [
-        "chromosome_id",
-        "gene_id",
-        "genus",
-        "species",
-        "tool",
-        "annotation",
-        "evalue",
-        "score",
-    ]
+        gene_infos = [
+            GeneInfo(chromosome_id=gene[0], gene_id=gene[1])
+            for gene in query_relation.project("chromosome_id", "gene_id")
+            .distinct()
+            .order("chromosome_id, gene_id")
+            .fetchall()
+        ]
 
-    request_pairs = polars.DataFrame(
-        data=map(
-            lambda s: ("_".join(s.split("_")[:-1]), s.split("_")[-1]),
-            request.gene_ids,
-        ),
-        schema={"chromosome_id": polars.Utf8, "gene_id": polars.Utf8},
-    )
-
-    results = (
-        request_pairs.lazy()
-        .join(annotations, on=["chromosome_id", "gene_id"], how="left")
-        .join(species, on="species_id", how="left")
-        .rename({"description": "annotation"})
-        .select(columns)
-        .collect()
-        .to_dicts()
-    )
-
-    return GenesResponse(results=[GeneAnnotation(**result) for result in results])
-
-
-@app.post("/api/clustering")
-async def clustering(submitted_file: UploadFile):
-    pass
+        return ExpressionResponse(
+            samples=samples,
+            genes=gene_infos,
+            values=[
+                x[0]
+                for x in query_relation.order("chromosome_id, gene_id, sample_id")
+                .project("tpm")
+                .fetchall()
+            ],
+        )
