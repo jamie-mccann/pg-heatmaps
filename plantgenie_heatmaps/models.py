@@ -1,44 +1,15 @@
-from typing import List, Optional
+from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from typing import List, Literal, Optional, Tuple
 
-
-class GeneList(BaseModel):
-    species: str
-    experiment: str
-    gene_ids: List[str] = Field(alias="geneIds")
+from pydantic import BaseModel, Field, ConfigDict
 
 
-class GeneInfo(BaseModel):
-    chromosome_id: str = Field(alias="chromosomeId")
-    gene_id: str = Field(alias="geneId")
+class PlantGenieModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class SampleInfo(BaseModel):
-    experiment_id: str = Field(alias="ExperimentId")
-    replicate_id: int
-    stub: str
-    experiment_description: str
-
-
-class ExpressionResponse(BaseModel):
-    genes: List[GeneInfo]
-    samples: List[SampleInfo]
-    values: List[float]
-
-
-# class GeneAnnotation(BaseModel):
-#     chromosome_id: str = Field(alias="chromosomeId")
-#     gene_id: str = Field(alias="geneId")
-#     genus: Optional[str]
-#     species: Optional[str]
-#     tool: Optional[str]
-#     annotation: Optional[str]
-#     evalue: Optional[float]
-#     score: Optional[float]
-
-
-class GeneAnnotation(BaseModel):
+class GeneAnnotation(PlantGenieModel):
     chromosome_id: str = Field(alias="chromosomeId")
     gene_id: str = Field(alias="geneId")
     tool: Optional[str]
@@ -47,5 +18,73 @@ class GeneAnnotation(BaseModel):
     seed_ortholog: Optional[str]
     description: Optional[str]
 
-class GenesResponse(BaseModel):
+
+class AnnotationsRequest(PlantGenieModel):
+    species: str
+    gene_ids: List[str] = Field(alias="geneIds")
+
+
+class AnnotationsResponse(PlantGenieModel):
+    results: List[GeneAnnotation]
+
+
+class GeneInfo(PlantGenieModel):
+    chromosome_id: str = Field(alias="chromosomeId")
+    gene_id: str = Field(alias="geneId")
+
+    @staticmethod
+    def split_from_request(gene_id_request: Tuple[str, str]) -> GeneInfo:
+        """
+        Gene IDs normally come in like this:
+            {chromosome_id}_{gene_id}
+
+        The gene_id part has no '_' inside of it, so it works to split on '_' and take
+        the last one for the gene_id and join the chromosome_id part on '_' and return it.
+        """
+        gene_id_split = gene_id_request.split("_")
+
+        if len(gene_id_split) < 2:
+            raise IndexError(
+                f"gene_id: {gene_id_request} split on '_' not at least length 2"
+            )
+
+        return GeneInfo(
+            chromosome_id="_".join(gene_id_split[:-1]), gene_id=gene_id_split[-1]
+        )
+
+    @staticmethod
+    def split_gene_ids_from_request(gene_ids: List[str]) -> List[GeneInfo]:
+        return [GeneInfo.split_from_request(gene_id) for gene_id in gene_ids]
+
+
+class GeneList(BaseModel):
+    species: str
+    experiment: str
+    gene_ids: List[str] = Field(alias="geneIds")
+
+    def gene_ids_to_gene_infos(self) -> List[GeneInfo]:
+        return [GeneInfo.split_from_request(gene_id) for gene_id in self.gene_ids]
+
+
+class SampleInfo(PlantGenieModel):
+    experiment: str
+    sample_id: str = Field(alias="sampleId")
+    sequencing_id: str = Field(alias="sequencingId")
+    condition: str
+
+
+class ExpressionRequest(PlantGenieModel):
+    species: str
+    experiment_id: int = Field(alias="experimentId")
+    clustering: Literal["none", "genes", "species", "both"] = Field(default="genes")
+    gene_ids: List[str] = Field(alias="geneIds", default=[])
+
+
+class ExpressionResponse(PlantGenieModel):
+    genes: List[GeneInfo]
+    samples: List[SampleInfo]
+    values: List[float]
+
+
+class GenesResponse(PlantGenieModel):
     results: List[GeneAnnotation]
