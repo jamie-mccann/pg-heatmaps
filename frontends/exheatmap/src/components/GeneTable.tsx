@@ -10,21 +10,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-import { GeneAnnotation } from "../models";
-// export interface GeneAnnotation {
-//   chromosome_id: string;
-//   gene_id: string;
-//   genus: string;
-//   species: string;
-//   tool: string;
-//   annotation: string;
-//   evalue: number;
-//   score: number;
-// }
 
-export interface GenesEndpointResponse {
-  results: GeneAnnotation[];
-}
+import { AnnotationsResponse, GeneAnnotation } from "../models";
+
 
 interface GeneTableProps {
   geneIds: string[];
@@ -63,7 +51,7 @@ const GeneTable = ({
           throw new Error(`Error fetching data from ${url}`);
         }
 
-        const result: GenesEndpointResponse = await response.json();
+        const result: AnnotationsResponse = await response.json();
         setGeneAnnotations(result.results);
         setSelected(result.results.map((_) => true));
       } catch (error) {
