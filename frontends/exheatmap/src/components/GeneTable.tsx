@@ -10,17 +10,17 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
-
-export interface GeneAnnotation {
-  chromosome_id: string;
-  gene_id: string;
-  genus: string;
-  species: string;
-  tool: string;
-  annotation: string;
-  evalue: number;
-  score: number;
-}
+import { GeneAnnotation } from "../models";
+// export interface GeneAnnotation {
+//   chromosome_id: string;
+//   gene_id: string;
+//   genus: string;
+//   species: string;
+//   tool: string;
+//   annotation: string;
+//   evalue: number;
+//   score: number;
+// }
 
 export interface GenesEndpointResponse {
   results: GeneAnnotation[];
@@ -163,10 +163,10 @@ const GeneTable = ({
                 <TableCell>
                   {value.genus} {value.species}
                 </TableCell>
-                <TableCell>{value.chromosome_id}</TableCell>
-                <TableCell>{value.gene_id}</TableCell>
+                <TableCell>{value.chromosomeId}</TableCell>
+                <TableCell>{value.geneId}</TableCell>
                 <TableCell>{value.tool}</TableCell>
-                <TableCell>{value.annotation}</TableCell>
+                <TableCell>{value.description}</TableCell>
                 <TableCell>{value.evalue?.toPrecision(3)}</TableCell>
                 <TableCell>{value.score}</TableCell>
               </TableRow>

@@ -95,6 +95,7 @@ export const useHeatMapRectangles = ({
         row: coord[0],
         col: coord[1],
         value: 1 - valuesScaled[i] / maxCellValue,
+        originalValue: valuesScaled[i]
       }));
 
     const heatmapRectsGroup = select(svgReference.current)
@@ -117,6 +118,8 @@ export const useHeatMapRectangles = ({
       })
       .on("mouseleave", function () {
         select(this).transition().duration(300).attr("stroke", "white");
-      });
+      })
+      .append("title")
+      .text((d) => `${d.originalValue} ${d.value}`);
   }, [svgReference, cellValues, xScaler, yScaler]);
 };

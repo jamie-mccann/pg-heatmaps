@@ -1,40 +1,20 @@
 import { useState } from "react";
+import { ActionFunction, Form, Outlet, redirect } from "react-router-dom";
 
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 
+import { useAppStore } from "../state/AppStore";
+import {
+  AnnotationsRequest,
+  AnnotationsResponse,
+  GeneAnnotation,
+} from "../models";
+
 import ExperimentSelect from "../components/ExperimentSelect";
 import GeneListMaker from "../components/GeneListMaker";
 import SpeciesSelect from "../components/SpeciesSelect";
-// import GeneTable, { GeneAnnotation } from "../components/GeneTable";
-import { Form, Outlet, redirect } from "react-router-dom";
-
-import { ActionFunction } from "react-router-dom";
-
-import { useAppStore } from "../state/AppStore";
-import { GeneAnnotation } from "../state/SliceTypes";
-
-interface GeneAnnotationRequestBody {
-  species?: string;
-  experiment?: string;
-  gene_ids: string[];
-}
-
-interface GeneAnnotationResponse {
-  chromosome_id: string;
-  gene_id: string;
-  genus: string;
-  species: string;
-  tool: string;
-  annotation: string;
-  evalue: number;
-  score: number;
-}
-
-interface GeneAnnotationResponseBody {
-  results: GeneAnnotationResponse[];
-}
 
 export const geneIdsAction: ActionFunction = async ({ request }) => {
   const setGeneIds = useAppStore.getState().setGeneIds;
@@ -57,13 +37,12 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
   const geneIds = (formData.get("geneIds") as string)?.trim().split("\n");
   setGeneIds(geneIds);
 
-  const requestBody: GeneAnnotationRequestBody = {
+  const requestBody: AnnotationsRequest = {
     species: formData.get("species") as string,
-    experiment: formData.get("experiment") as string,
-    gene_ids: geneIds,
+    geneIds: geneIds,
   };
 
-  const url = "http://localhost:8080/api/genes";
+  const url = "http://localhost:8080/api/annotations";
 
   const response = await fetch(url, {
     method: "POST",
@@ -78,7 +57,7 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
     throw new Error(`Error fetching data from ${url}`);
   }
 
-  const geneAnnotations = (await response.json()) as GeneAnnotationResponseBody;
+  const geneAnnotations = (await response.json()) as AnnotationsResponse;
 
   setGeneAnnotations(geneAnnotations.results as GeneAnnotation[]);
 
@@ -86,11 +65,11 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
 };
 
 const Root = () => {
-  const [species, setSpecies] = useState<string | null>(null);
-  const [experiment, setExperiment] = useState<string | null>(null);
+  const species = useAppStore((state) => state.species);
+  const experiment = useAppStore((state) => state.experiment);
+  const setSpecies = useAppStore((state) => state.setSpecies);
+  const setExperiment = useAppStore((state) => state.setExperiment);
   const [geneIds, setGeneIds] = useState<string>("");
-  // const [geneIds, setGeneIds] = useState<string[]>([]);
-  // const [geneAnnotations, setGeneAnnotations] = useState<GeneAnnotation[]>([]);
 
   return (
     <Grid container>
