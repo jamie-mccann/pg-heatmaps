@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { GenesSlice, HeatmapSlice } from "./SliceTypes";
+import { GenesSlice, HeatmapSlice, SvgCanvasSlice } from "./SliceTypes";
 
 export const createHeatmapSlice: StateCreator<
   HeatmapSlice,
@@ -20,4 +20,12 @@ export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
   geneAnnotations: [],
   setGeneIds: (ids) => set({ geneIds: ids }),
   setGeneAnnotations: (annotations) => set({ geneAnnotations: annotations }),
+});
+
+export const createSvgCanvasSlice: StateCreator<SvgCanvasSlice> = (set) => ({
+  svgRef: null,
+  setSvgRef: (ref) => set({ svgRef: ref }),
+  height: 0,
+  width: 0,
+  setDimensions: (w, h) => set({ height: h, width: w }),
 });
