@@ -67,7 +67,6 @@ async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResp
         + ")"
     )
 
-    # with duckdb.connect(DATABASES[request.species], read_only=True) as connection:
     with duckdb.connect(DATABASE_PATH, read_only=True) as connection:
         query_relation = connection.sql(
             query=query,
@@ -111,7 +110,7 @@ async def get_expression_duckdb(request: ExpressionRequest) -> ExpressionRespons
         )
 
         query = (
-            f"SELECT * FROM ("
+            "SELECT * FROM ("
             f"SELECT * FROM {experiment} WHERE (chromosome_id, gene_id) IN ("
             + ", ".join(["(?, ?)"] * len(gene_ids))
             + ")) AS l "
