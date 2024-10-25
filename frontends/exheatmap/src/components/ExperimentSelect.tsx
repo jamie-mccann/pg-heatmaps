@@ -16,8 +16,9 @@ const experimentsBySpecies: { [key: string]: string[] } = {
     "Cold Stress Roots",
     "Drought Stress Needles",
     "Drought Stress Roots",
-    "Seasonal Needles",
-    "Seasonal Wood",
+    // these ones are not in the db yet
+    // "Seasonal Needles",
+    // "Seasonal Wood",
   ],
   "Pinus sylvestris": [
     "Cold Stress Needles",
