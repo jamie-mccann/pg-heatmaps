@@ -10,7 +10,7 @@ import {
   AnnotationsRequest,
   AnnotationsResponse,
   GeneAnnotation,
-} from "../models";
+} from "../Models";
 
 import ExperimentSelect from "../components/ExperimentSelect";
 import GeneListMaker from "../components/GeneListMaker";

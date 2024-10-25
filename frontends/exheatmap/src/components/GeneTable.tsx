@@ -11,7 +11,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 
-import { AnnotationsResponse, GeneAnnotation } from "../models";
+import { AnnotationsResponse, GeneAnnotation } from "../Models";
 
 
 interface GeneTableProps {

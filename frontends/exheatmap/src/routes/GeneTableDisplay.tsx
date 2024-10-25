@@ -15,7 +15,7 @@ import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 
 import { useAppStore } from "../state/AppStore";
 
-import { GeneAnnotation } from "../models";
+import { GeneAnnotation } from "../Models";
 
 export const loader: LoaderFunction = (): GeneAnnotation[] => {
   return useAppStore.getState().geneAnnotations;
