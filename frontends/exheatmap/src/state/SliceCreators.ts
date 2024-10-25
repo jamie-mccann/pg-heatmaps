@@ -1,6 +1,5 @@
 import { StateCreator } from "zustand";
 import { GenesSlice, HeatmapSlice, SvgCanvasSlice } from "./SliceTypes";
-
 export const createHeatmapSlice: StateCreator<
   HeatmapSlice,
   [],

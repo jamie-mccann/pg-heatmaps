@@ -16,8 +16,9 @@ export interface GenesSlice {
 
 export interface SvgCanvasSlice {
   svgRef: React.RefObject<SVGSVGElement> | null;
-  setSvgRef: (ref: React.RefObject<SVGSVGElement>) => void;
+  setSvgRef: (ref: React.RefObject<SVGSVGElement> | null) => void;
   height: number;
   width: number;
   setDimensions: (w: number, h: number) => void;
 }
+

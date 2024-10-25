@@ -6,12 +6,14 @@ const Index = () => {
   return (
     <Paper>
       <Grid flexDirection="column" alignItems="center" padding={2} spacing={2}>
-        <Typography variant="h3">Welcome to ExHeatMap</Typography>
+        <Typography variant="h3">ExHeatMap</Typography>
+        <div><p></p></div>
         <Typography variant="body1">
           This tool allows you to select a species and gene expression
           experiment as well as enter a list of genes to plot a heatmap of
           samples against their gene expression values for the entered genes.
         </Typography>
+        <div><p></p></div>
         <Typography variant="body1">
           The genes to be displayed are entered in the text field in the size
           bar under the heading "Gene List". It should be a line-delimited set

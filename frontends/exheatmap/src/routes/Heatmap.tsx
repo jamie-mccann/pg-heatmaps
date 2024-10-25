@@ -12,11 +12,13 @@ import {
   ExperimentTitleToId,
   ExpressionRequest,
   ExpressionResponse,
-} from "../models.ts";
+} from "../Models";
 import {
   useHeatMapRectangles,
   useMaxTextLengths,
 } from "../hooks/useHeatmap.ts";
+import SvgCanvas from "../components/SvgCanvas.tsx";
+// import SvgCanvas from "../components/SvgCanvas.tsx";
 
 interface HeatMapProps {
   svgWidth: number;
@@ -40,9 +42,13 @@ const Heatmap = () => {
   const species = useAppStore((state) => state.species);
   const experiment = useAppStore((state) => state.experiment);
 
+  const svgWidth = useAppStore((state) => state.width);
+  const svgHeight = useAppStore((state) => state.height);
+  const heatmapSvgRef = useAppStore((state) => state.svgRef);
+
   const heatMapSettings: HeatMapProps = {
-    svgHeight: 2500,
-    svgWidth: 960,
+    svgHeight: svgWidth,
+    svgWidth: svgHeight,
     marginTop: 30,
     marginRight: 30,
     marginBottom: 30,
@@ -52,7 +58,7 @@ const Heatmap = () => {
     cellPadding: 1,
   };
 
-  const heatmapSvgRef = useRef<SVGSVGElement | null>(null);
+  // const heatmapSvgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     // we want to redirect to the "/" route if the user refreshes the page
@@ -79,7 +85,7 @@ const Heatmap = () => {
             Accept: "application/json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
@@ -112,9 +118,7 @@ const Heatmap = () => {
         )
       : [],
     colLabels: expressionData
-      ? expressionData.samples.map(
-          (value) => `${value.experiment}_${value.sampleId}`
-        )
+      ? expressionData.samples.map((value) => `${value.sampleId}`)
       : [],
     labelFontSize: heatMapSettings.labelFontSize,
   });
@@ -164,7 +168,7 @@ const Heatmap = () => {
   });
 
   useEffect(() => {
-    if (heatmapSvgRef.current === null || expressionData === null) return;
+    if (heatmapSvgRef === null || expressionData === null) return;
     if (rowTextLength === null || colTextLength === null) return;
     if (rowScale === undefined || colScale === undefined) return;
 
@@ -230,7 +234,7 @@ const Heatmap = () => {
       .attr("fill", "white")
       .attr("text-anchor", "left")
       .attr("dominant-baseline", "middle")
-      .text((d) => `${d.experiment}_${d.sampleId}`)
+      .text((d) => `${d.sampleId}`)
       .on("mouseenter", function () {
         select(this).transition().duration(300).attr("font-weight", "bold");
       })
@@ -250,12 +254,13 @@ const Heatmap = () => {
         width: heatMapSettings.svgWidth,
       }}
     >
-      <svg
+      {/* <svg
         id="svg-canvas-2"
         className="svg-canvas"
         ref={heatmapSvgRef}
         style={{ height: "100%", width: "100%" }}
-      ></svg>
+      ></svg> */}
+      <SvgCanvas></SvgCanvas>
     </Paper>
   );
 };
