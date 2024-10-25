@@ -10,10 +10,9 @@ const SvgCanvas = ({ children }: SvgCanvasProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const setSvgRef = useAppStore((state) => state.setSvgRef);
   const setDimensions = useAppStore((state) => state.setDimensions);
-  const { svgWidth, svgHeight } = useAppStore((state) => ({
-    svgWidth: state.width,
-    svgHeight: state.height,
-  }));
+
+  const svgWidth = useAppStore((state) => state.width);
+  const svgHeight = useAppStore((state) => state.height);
 
   useEffect(() => {
     setSvgRef(svgRef);

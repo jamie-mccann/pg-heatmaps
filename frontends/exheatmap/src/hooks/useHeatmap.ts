@@ -6,7 +6,7 @@ import { ScaleLinear } from "d3-scale";
 import { range } from "d3";
 
 interface MaxTextLengthsProps {
-  svgReference: RefObject<SVGSVGElement>;
+  svgReference: RefObject<SVGSVGElement> | null;
   rowLabels: string[];
   colLabels: string[];
   labelFontSize: number;
@@ -20,6 +20,8 @@ export const useMaxTextLengths = ({
 }: MaxTextLengthsProps) => {
   const [rowTextLength, setRowTextLength] = useState<number | null>(null);
   const [colTextLength, setColTextLength] = useState<number | null>(null);
+
+  if (svgReference === null) return { rowTextLength: 0, colTextLength: 0}
 
   useEffect(() => {
     const rowTextLengths = rowLabels.map((value) => {
@@ -59,7 +61,7 @@ export const useMaxTextLengths = ({
 };
 
 interface GenerateHeatMapRectanglesArgs {
-  svgReference: RefObject<SVGSVGElement>;
+  svgReference: RefObject<SVGSVGElement> | null;
   numberOfRows: number;
   numberOfCols: number;
   cellValues: number[];

@@ -12,7 +12,7 @@ import {
   ExperimentTitleToId,
   ExpressionRequest,
   ExpressionResponse,
-} from "../models.ts";
+} from "../Models";
 import {
   useHeatMapRectangles,
   useMaxTextLengths,

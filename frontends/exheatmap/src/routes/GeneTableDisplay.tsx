@@ -48,10 +48,9 @@ const GeneTableDisplay = () => {
       <Button
         variant="contained"
         color="secondary"
-        disabled
-        onClick={() => navigate("/network")}
+        onClick={() => navigate("/responsive-heatmap")}
       >
-        Network
+        Responsive Heatmap
       </Button>
       <TableContainer component={Paper} sx={{ maxHeight: 859 }}>
         <Table stickyHeader size="medium">
