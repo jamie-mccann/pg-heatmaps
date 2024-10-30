@@ -5,6 +5,7 @@ import { useAppStore } from "../state/AppStore";
 export interface HeatmapTooltipSettings {
   defaultWidth?: number;
   fontSize?: number;
+  linePadding?: number;
   paddingLeft?: number;
   paddingRight?: number;
 }
@@ -12,6 +13,7 @@ export interface HeatmapTooltipSettings {
 const HeatmapTooltip = ({
   defaultWidth = 100,
   fontSize = 12,
+  linePadding = 8,
   paddingLeft = 8,
   paddingRight = 8,
 }: HeatmapTooltipSettings) => {
@@ -21,6 +23,8 @@ const HeatmapTooltip = ({
   const tooltipRef = useRef<SVGGElement>(null);
 
   const [tooltipWidth, setTooltipWidth] = useState(defaultWidth);
+
+  const tooltipHeight = 4 * linePadding + 3 * fontSize;
 
   useEffect(() => {
     if (svgRef === null || svgRef.current === null) return;
@@ -37,10 +41,6 @@ const HeatmapTooltip = ({
 
       let x = (event.pageX - CTM.e + 6) / CTM.a;
       let y = (event.pageY - CTM.f + 20) / CTM.d;
-
-      // Width and height of the tooltip group element
-      // const tooltipWidth = 200; // Adjust based on tooltip size
-      const tooltipHeight = 60; // Adjust based on tooltip size
 
       // Check if tooltip would overflow the SVG width and adjust x position
       if (x + tooltipWidth + paddingLeft + paddingRight > svgWidth) {
@@ -151,7 +151,7 @@ const HeatmapTooltip = ({
         x={2}
         y={2}
         width={tooltipWidth}
-        height={60}
+        height={tooltipHeight}
         fill="black"
         opacity={0.4}
         rx={2}
@@ -162,7 +162,7 @@ const HeatmapTooltip = ({
         x={0}
         y={0}
         width={tooltipWidth}
-        height={60}
+        height={tooltipHeight}
         fill="white"
         rx={2}
         ry={2}
@@ -172,8 +172,9 @@ const HeatmapTooltip = ({
         fontFamily="Roboto"
         fontWeight="normal"
         fontSize={fontSize}
+        dominantBaseline="hanging"
         x={paddingLeft}
-        y={13}
+        y={linePadding}
       >
         tooltip row label
       </text>
@@ -182,8 +183,9 @@ const HeatmapTooltip = ({
         fontFamily="Roboto"
         fontWeight="normal"
         fontSize={fontSize}
+        dominantBaseline="hanging"
         x={paddingLeft}
-        y={33}
+        y={fontSize + 2 * linePadding}
       >
         tooltip column label
       </text>
@@ -192,8 +194,9 @@ const HeatmapTooltip = ({
         fontFamily="Roboto"
         fontWeight="normal"
         fontSize={fontSize}
+        dominantBaseline="hanging"
         x={paddingLeft}
-        y={53}
+        y={2 * fontSize + 3 * linePadding}
       >
         tooltip cell value
       </text>
