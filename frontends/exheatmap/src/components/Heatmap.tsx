@@ -1,151 +1,278 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 
-// import { range } from "d3";
-// import { select } from "d3-selection";
+import { interpolateRdYlBu, range } from "d3";
+import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 
 import { useAppStore } from "../state/AppStore";
-import {
-  ExperimentTitleToId,
-  ExpressionRequest,
-  ExpressionResponse,
-} from "../Models";
+import { HeatmapSettings } from "../Models";
 
-import { useHeatMapRectangles, useMaxTextLengths } from "../hooks/useHeatmap";
-
-const Heatmap = () => {
+const Heatmap = ({
+  marginConfig: { marginTop, marginBottom, marginLeft, marginRight },
+  labelConfig: { labelFontSize, labelPadding },
+  cellConfig: { cellPadding },
+  data,
+  rowLabels,
+  colLabels,
+}: HeatmapSettings) => {
   const svgRef = useAppStore((state) => state.svgRef);
   const svgWidth = useAppStore((state) => state.width);
   const svgHeight = useAppStore((state) => state.height);
-  const geneAnnotations = useAppStore((state) => state.geneAnnotations);
-  const species = useAppStore((state) => state.species);
-  const experiment = useAppStore((state) => state.experiment);
+  const [rowTextLength, setRowTextLength] = useState<number>(0);
+  const [colTextLength, setColTextLength] = useState<number>(0);
 
-  const heatMapSettings = {
-    svgHeight: svgHeight,
-    svgWidth: svgWidth,
-    marginTop: 30,
-    marginRight: 30,
-    marginBottom: 30,
-    marginLeft: 30,
-    labelFontSize: 10,
-    labelPadding: 10,
-    cellPadding: 1,
-  };
+  useLayoutEffect(() => {
+    const hiddenSvg = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "svg"
+    );
+    hiddenSvg.setAttribute("visibility", "hidden");
+    document.body.appendChild(hiddenSvg);
 
-  const [expressionData, setExpressionData] =
-    useState<ExpressionResponse | null>(null);
+    const xTextLengths = rowLabels.map((value) => {
+      const textEl = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+      textEl.setAttribute("visibility", "hidden");
+      textEl.setAttribute("font-size", `${labelFontSize}`);
+      textEl.textContent = value;
+      hiddenSvg.appendChild(textEl);
+      const length = textEl.getComputedTextLength();
+      hiddenSvg.removeChild(textEl);
+      return length;
+    });
 
-  const navigate = useNavigate();
+    setRowTextLength(Math.max(...xTextLengths));
+
+    const yTextLengths = colLabels.map((value) => {
+      const textEl = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "text"
+      );
+      textEl.setAttribute("visibility", "hidden");
+      textEl.setAttribute("font-size", `${labelFontSize}`);
+      textEl.textContent = value;
+      hiddenSvg.appendChild(textEl);
+      const length = textEl.getComputedTextLength();
+      hiddenSvg.removeChild(textEl);
+      return length;
+    });
+
+    setColTextLength(Math.max(...yTextLengths));
+
+    document.body.removeChild(hiddenSvg);
+  }, []);
 
   useEffect(() => {
-    // we want to redirect to the "/" route if the user refreshes the page
-    if (geneAnnotations.length === 0) navigate("/");
+    if (svgRef === null) return;
 
-    if (species === null) navigate("/");
+    select(svgRef.current)
+      .select("#rectangles")
+      .selectAll("rect")
+      .on("mouseenter", function () {
+        select(this).transition().duration(300).style("stroke", "black");
+      })
+      .on("mouseleave", function () {
+        select(this).transition().duration(300).style("stroke", "white");
+      });
 
-    const requestBody: ExpressionRequest = {
-      species: species!, // species has to be set here, no?
-      clustering: "none",
-      experimentId: ExperimentTitleToId[`${species} ${experiment}`],
-      geneIds: geneAnnotations.map(
-        (value) => `${value.chromosomeId}_${value.geneId}`
-      ),
-    };
+    select(svgRef.current)
+      .select("#row-labels")
+      .selectAll("text")
+      .on("mouseenter", function () {
+        select(this).transition().duration(300).attr("font-weight", "bold");
+      })
+      .on("mouseleave", function () {
+        select(this).transition().duration(300).attr("font-weight", "normal");
+      });
 
-    const fetchData = async () => {
-      const url = "http://localhost:8080/api/expression";
+    select(svgRef.current)
+      .select("#col-labels")
+      .selectAll("text")
+      .on("mouseenter", function () {
+        select(this).transition().duration(300).attr("font-weight", "bold");
+      })
+      .on("mouseleave", function () {
+        select(this).transition().duration(300).attr("font-weight", "normal");
+      });
+  }, [svgRef]);
 
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        });
+  useEffect(() => {
+    if (svgRef === null || svgRef.current === null) return;
 
-        if (!response.ok) {
-          throw {
-            name: "DataFetchException",
-            message: `Unable to fetch data from ${url}`,
-          } as Error;
-        }
+    const svg = svgRef.current;
 
-        const result: ExpressionResponse = await response.json();
-        setExpressionData(result);
-      } catch (error) {
-        console.log(
-          error instanceof Error ? error.message : "Unknown error occurred"
+    const svgCtm = svg.getScreenCTM();
+
+    const tooltip = document.getElementById("tooltip");
+
+    const showTooltip = (event: MouseEvent) => {
+      event.preventDefault();
+      if (svgCtm === null) return;
+      if (tooltip === null) return;
+
+      const mouseX = (event.pageX - svgCtm.e) / svgCtm.a;
+      const mouseY = (event.pageY - svgCtm.f) / svgCtm.d;
+
+      tooltip.setAttributeNS(null, "x", (mouseX + 6 / svgCtm.a).toString());
+      tooltip.setAttributeNS(null, "y", (mouseY + 20 / svgCtm.d).toString());
+      tooltip.setAttributeNS(null, "visibility", "visible");
+
+      Array.from(tooltip.children).forEach((value) =>
+        tooltip.removeChild(value)
+      );
+
+      if (event.target) {
+        const tooltipText = (event.target as SVGRectElement).getAttributeNS(
+          null,
+          "data-tooltip-text"
         );
-      } finally {
-        console.log("Done loading the page data");
+
+        tooltipText !== null &&
+          tooltipText.split("\n").forEach((value, index) => {
+            const tspan = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "tspan"
+            );
+            tspan.setAttribute("x", (mouseX + 6 / svgCtm.a).toString());
+            tspan.setAttribute("dy", index === 0 ? "0" : "1.2em");
+            tspan.textContent = value;
+            tooltip.appendChild(tspan);
+          });
       }
     };
-    fetchData();
-  }, [geneAnnotations]);
 
-  const { rowTextLength, colTextLength } = useMaxTextLengths({
-    svgReference: svgRef,
-    rowLabels: expressionData
-      ? expressionData.genes.map(
-          (value) => `${value.chromosomeId}_${value.geneId}`
-        )
-      : [],
-    colLabels: expressionData
-      ? expressionData.samples.map(
-          (value) => `${value.experiment}_${value.sampleId}`
-        )
-      : [],
-    labelFontSize: heatMapSettings.labelFontSize,
-  });
+    const hideTooltip = (event: MouseEvent) => {
+      event.preventDefault();
+      tooltip?.setAttributeNS(null, "visibility", "hidden");
+    };
 
-  const rowScale = useMemo(
+    const triggers = document.getElementsByClassName("tooltip-trigger");
+
+    Array.from(triggers).map((value) => {
+      (value as SVGRectElement).addEventListener("mouseenter", showTooltip);
+      (value as SVGRectElement).addEventListener("mouseleave", hideTooltip);
+    });
+  }, [svgRef]);
+
+  const xAxisScale = useMemo(
     () =>
-      rowTextLength === null || rowTextLength < 0 || expressionData === null
-        ? undefined
-        : scaleLinear()
-            .domain([0, expressionData.samples.length])
-            .range([
-              heatMapSettings.marginLeft,
-              heatMapSettings.svgWidth -
-                heatMapSettings.marginRight -
-                rowTextLength -
-                heatMapSettings.labelPadding,
-            ]),
-    [rowTextLength, expressionData]
+      scaleLinear()
+        .domain([0, colLabels.length])
+        .range([
+          marginLeft,
+          svgWidth - marginRight - rowTextLength - labelPadding,
+        ]),
+    [svgWidth, rowTextLength]
   );
 
-  const colScale = useMemo(
+  const yAxisScale = useMemo(
     () =>
-      colTextLength === null || colTextLength < 0 || expressionData === null
-        ? undefined
-        : scaleLinear()
-            .domain([0, expressionData.genes.length])
-            .range([
-              heatMapSettings.marginTop +
-                colTextLength * Math.sin(Math.PI / 4) +
-                heatMapSettings.labelPadding,
-              heatMapSettings.svgHeight - heatMapSettings.marginBottom,
-            ]),
-    [colTextLength, expressionData]
+      scaleLinear()
+        .domain([0, rowLabels.length])
+        .range([
+          marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
+          svgHeight - marginBottom,
+        ]),
+    [svgHeight, colTextLength]
   );
 
-  useHeatMapRectangles({
-    svgReference: svgRef,
-    numberOfRows:
-      expressionData !== null ? expressionData.genes.length : -Infinity,
-    numberOfCols:
-      expressionData !== null ? expressionData.samples.length : -Infinity,
-    cellValues: expressionData !== null ? expressionData.values : [],
-    cellValueScaleFunction: (value) => Math.log2(1 + value),
-    xScaler: rowScale,
-    yScaler: colScale,
-    cellPadding: heatMapSettings.cellPadding,
-  });
-  return <></>
+  const matrixIndices = useMemo(
+    () =>
+      range(rowLabels.length).flatMap((row) =>
+        range(colLabels.length).map((col) => [row, col])
+      ),
+    [rowLabels, colLabels]
+  );
+
+  return (
+    <>
+      <g id="rectangles">
+        {data.map((value, index) => (
+          <rect
+            className="tooltip-trigger"
+            key={index}
+            x={xAxisScale(matrixIndices[index][1])}
+            y={yAxisScale(matrixIndices[index][0])}
+            width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
+            height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
+            fill={interpolateRdYlBu(value)}
+            strokeWidth={1}
+            stroke="white"
+            data-tooltip-text={`row: ${
+              rowLabels[matrixIndices[index][1]]
+            }\ncol: ${colLabels[matrixIndices[index][0]]}\nvalue: ${value}`}
+          >
+            <title>{value}</title>
+          </rect>
+        ))}
+      </g>
+      <g id="row-labels">
+        {rowLabels.map((value, index) => (
+          <text
+            key={index}
+            transform={`translate(${svgWidth - marginRight - rowTextLength}, ${
+              (yAxisScale(index) + yAxisScale(index + 1)) / 2
+            })`}
+            fontSize={labelFontSize}
+            fontFamily="Roboto,monospace"
+            textAnchor="left"
+            dominantBaseline="middle"
+            fontWeight="normal"
+            fill="lightgrey"
+          >
+            {value}
+          </text>
+        ))}
+      </g>
+      <g id="col-labels">
+        {colLabels.map((value, index) => (
+          <text
+            key={index}
+            transform={`translate(${
+              (xAxisScale(index) + xAxisScale(index + 1)) / 2
+            },${
+              marginTop + colTextLength * Math.sin(Math.PI / 4)
+            }) rotate(-45)`}
+            fontSize={labelFontSize}
+            fontFamily="Roboto,monospace"
+            textAnchor="left"
+            dominantBaseline="middle"
+            fontWeight="normal"
+            fill="lightgrey"
+          >
+            {value}
+          </text>
+        ))}
+      </g>
+      {/* <g id="tooltip" visibility="hidden">
+        <rect
+          x={2}
+          y={2}
+          width={80}
+          height={24}
+          fill="black"
+          opacity={0.4}
+          rx={2}
+          ry={2}
+        />
+        <rect width={80} height={24} fill="white" opacity={0.4} rx={2} ry={2} />
+        <text id="tooltip-text" x={4} y={6}>
+          tooltip
+        </text>
+      </g> */}
+      <text
+        id="tooltip"
+        visibility="hidden"
+        // dominantBaseline="hanging"
+        overflow="visible"
+        fill="white"
+        fontSize={labelFontSize}
+        fontFamily="Roboto"
+      ></text>
+    </>
+  );
 };
 
 export default Heatmap;

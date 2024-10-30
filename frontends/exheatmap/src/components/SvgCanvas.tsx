@@ -25,6 +25,7 @@ const SvgCanvas = ({ children }: SvgCanvasProps) => {
           console.log(`width: ${width} height: ${height}`);
         }
       }
+      console.log(`${svgWidth} ${svgHeight}`)
     };
 
     const resizeObserver = new ResizeObserver(() => {

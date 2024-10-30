@@ -42,6 +42,7 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
     geneIds: geneIds,
   };
 
+  // const url = "http://192.168.0.109:8080/api/annotations";
   const url = "http://localhost:8080/api/annotations";
 
   const response = await fetch(url, {

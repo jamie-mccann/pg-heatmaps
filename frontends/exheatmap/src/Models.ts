@@ -53,3 +53,28 @@ export const ExperimentTitleToId: { [key: string]: number } = {
   "Pinus sylvestris Drought Stress Roots": 7,
   "Pinus sylvestris Drought Stress Needles": 8,
 };
+
+export interface HeatmapMarginConfig {
+  marginTop: number;
+  marginBottom: number;
+  marginLeft: number;
+  marginRight: number;
+}
+
+export interface HeatmapLabelConfig {
+  labelFontSize: number;
+  labelPadding: number;
+}
+
+export interface HeatmapCellConfig {
+  cellPadding: number;
+}
+
+export interface HeatmapSettings {
+  marginConfig: HeatmapMarginConfig;
+  labelConfig: HeatmapLabelConfig;
+  cellConfig: HeatmapCellConfig;
+  data: number[],
+  rowLabels: string[],
+  colLabels: string[]
+}
