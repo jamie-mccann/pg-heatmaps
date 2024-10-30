@@ -60,6 +60,11 @@ async def api_root():
 async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResponse:
     gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
 
+    # Map gene_ids to their original order for sorting results later
+    gene_id_order = {
+        (gene.chromosome_id, gene.gene_id): i for i, gene in enumerate(gene_ids)
+    }
+
     # build query template with (?, ?) for each gene_id
     query = (
         "SELECT * FROM annotations WHERE (chromosome_id, gene_id) IN ("
@@ -85,20 +90,32 @@ async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResp
             "description",
         )
 
-        return AnnotationsResponse(
-            results=[
-                GeneAnnotation(
-                    # zip the GeneAnnotation fields with the row tuple - match order in query!
-                    **{k: v for k, v in zip(GeneAnnotation.model_fields.keys(), result)}
-                )
-                for result in query_relation.fetchall()
-            ]
+        # Collect and reorder results based on original input order
+        annotations = [
+            GeneAnnotation(
+                **{k: v for k, v in zip(GeneAnnotation.model_fields.keys(), result)}
+            )
+            for result in query_relation.fetchall()
+        ]
+
+        # Sort by the original order of gene_ids
+        ordered_annotations = sorted(
+            annotations,
+            key=lambda annotation: gene_id_order[
+                (annotation.chromosome_id, annotation.gene_id)
+            ],
         )
+
+        return AnnotationsResponse(results=ordered_annotations)
 
 
 @app.post("/api/expression")
 async def get_expression_duckdb(request: ExpressionRequest) -> ExpressionResponse:
     gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
+
+    gene_id_order = {
+        (gene.chromosome_id, gene.gene_id): i for i, gene in enumerate(gene_ids)
+    }
 
     with duckdb.connect(DATABASE_PATH, read_only=True) as connection:
         experiment = (
