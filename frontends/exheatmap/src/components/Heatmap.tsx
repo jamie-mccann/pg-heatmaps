@@ -99,14 +99,18 @@ const Heatmap = ({
       });
   }, [svgRef]);
 
+  const heatmapBounds = useMemo(() => ({
+    top: marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
+    bottom: svgHeight - marginBottom,
+    left: marginLeft,
+    right: svgWidth - marginRight - rowTextLength - labelPadding,
+  }), [svgWidth, svgHeight]);
+
   const xAxisScale = useMemo(
     () =>
       scaleLinear()
         .domain([0, colLabels.length])
-        .range([
-          marginLeft,
-          svgWidth - marginRight - rowTextLength - labelPadding,
-        ]),
+        .range([heatmapBounds.left, heatmapBounds.right]),
     [svgWidth, rowTextLength]
   );
 
@@ -114,10 +118,7 @@ const Heatmap = ({
     () =>
       scaleLinear()
         .domain([0, rowLabels.length])
-        .range([
-          marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
-          svgHeight - marginBottom,
-        ]),
+        .range([heatmapBounds.top, heatmapBounds.bottom]),
     [svgHeight, colTextLength]
   );
 
@@ -131,7 +132,26 @@ const Heatmap = ({
 
   return (
     <>
-      <rect id="background" fill="#121212" width={svgWidth} height={svgHeight} rx={5} ry={5}></rect>
+      <rect
+        id="svg-background"
+        fill="#121212"
+        width={svgWidth}
+        height={svgHeight}
+        rx={5}
+        ry={5}
+      ></rect>
+      <rect
+        id="heatmap-background"
+        fill="white"
+        strokeWidth={1}
+        stroke="white"
+        rx={1}
+        ry={1}
+        x={heatmapBounds.left - 1}
+        y={heatmapBounds.top - 1}
+        width={heatmapBounds.right - heatmapBounds.left + 1}
+        height={heatmapBounds.bottom - heatmapBounds.top + 1}
+      ></rect>
       <g id="rectangles">
         {data.map((value, index) => (
           <rect
@@ -147,8 +167,9 @@ const Heatmap = ({
             data-row-label={rowLabels[matrixIndices[index][0]]}
             data-col-label={colLabels[matrixIndices[index][1]]}
             data-cell-value={value}
-          >
-          </rect>
+            rx={1}
+            ry={1}
+          ></rect>
         ))}
       </g>
       <g id="row-labels">
@@ -159,7 +180,7 @@ const Heatmap = ({
               (yAxisScale(index) + yAxisScale(index + 1)) / 2
             })`}
             fontSize={labelFontSize}
-            fontFamily="Roboto,monospace"
+            fontFamily="Roboto"
             textAnchor="left"
             dominantBaseline="middle"
             fontWeight="normal"
@@ -179,7 +200,7 @@ const Heatmap = ({
               marginTop + colTextLength * Math.sin(Math.PI / 4)
             }) rotate(-45)`}
             fontSize={labelFontSize}
-            fontFamily="Roboto,monospace"
+            fontFamily="Roboto"
             textAnchor="left"
             dominantBaseline="middle"
             fontWeight="normal"
