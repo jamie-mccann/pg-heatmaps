@@ -6,6 +6,7 @@ import { scaleLinear } from "d3-scale";
 
 import { useAppStore } from "../state/AppStore";
 import { HeatmapSettings } from "../Models";
+import HeatmapTooltip from "./HeatmapTooltip";
 
 const Heatmap = ({
   marginConfig: { marginTop, marginBottom, marginLeft, marginRight },
@@ -16,8 +17,8 @@ const Heatmap = ({
   colLabels,
 }: HeatmapSettings) => {
   const svgRef = useAppStore((state) => state.svgRef);
-  const svgWidth = useAppStore((state) => state.width);
-  const svgHeight = useAppStore((state) => state.height);
+  const svgWidth = useAppStore((state) => state.svgWidth);
+  const svgHeight = useAppStore((state) => state.svgHeight);
   const [rowTextLength, setRowTextLength] = useState<number>(0);
   const [colTextLength, setColTextLength] = useState<number>(0);
 
@@ -98,64 +99,6 @@ const Heatmap = ({
       });
   }, [svgRef]);
 
-  useEffect(() => {
-    if (svgRef === null || svgRef.current === null) return;
-
-    const svg = svgRef.current;
-
-    const svgCtm = svg.getScreenCTM();
-
-    const tooltip = document.getElementById("tooltip");
-
-    const showTooltip = (event: MouseEvent) => {
-      event.preventDefault();
-      if (svgCtm === null) return;
-      if (tooltip === null) return;
-
-      const mouseX = (event.pageX - svgCtm.e) / svgCtm.a;
-      const mouseY = (event.pageY - svgCtm.f) / svgCtm.d;
-
-      tooltip.setAttributeNS(null, "x", (mouseX + 6 / svgCtm.a).toString());
-      tooltip.setAttributeNS(null, "y", (mouseY + 20 / svgCtm.d).toString());
-      tooltip.setAttributeNS(null, "visibility", "visible");
-
-      Array.from(tooltip.children).forEach((value) =>
-        tooltip.removeChild(value)
-      );
-
-      if (event.target) {
-        const tooltipText = (event.target as SVGRectElement).getAttributeNS(
-          null,
-          "data-tooltip-text"
-        );
-
-        tooltipText !== null &&
-          tooltipText.split("\n").forEach((value, index) => {
-            const tspan = document.createElementNS(
-              "http://www.w3.org/2000/svg",
-              "tspan"
-            );
-            tspan.setAttribute("x", (mouseX + 6 / svgCtm.a).toString());
-            tspan.setAttribute("dy", index === 0 ? "0" : "1.2em");
-            tspan.textContent = value;
-            tooltip.appendChild(tspan);
-          });
-      }
-    };
-
-    const hideTooltip = (event: MouseEvent) => {
-      event.preventDefault();
-      tooltip?.setAttributeNS(null, "visibility", "hidden");
-    };
-
-    const triggers = document.getElementsByClassName("tooltip-trigger");
-
-    Array.from(triggers).map((value) => {
-      (value as SVGRectElement).addEventListener("mouseenter", showTooltip);
-      (value as SVGRectElement).addEventListener("mouseleave", hideTooltip);
-    });
-  }, [svgRef]);
-
   const xAxisScale = useMemo(
     () =>
       scaleLinear()
@@ -188,6 +131,7 @@ const Heatmap = ({
 
   return (
     <>
+      <rect id="background" fill="#121212" width={svgWidth} height={svgHeight} rx={5} ry={5}></rect>
       <g id="rectangles">
         {data.map((value, index) => (
           <rect
@@ -200,11 +144,10 @@ const Heatmap = ({
             fill={interpolateRdYlBu(value)}
             strokeWidth={1}
             stroke="white"
-            data-tooltip-text={`row: ${
-              rowLabels[matrixIndices[index][1]]
-            }\ncol: ${colLabels[matrixIndices[index][0]]}\nvalue: ${value}`}
+            data-row-label={rowLabels[matrixIndices[index][0]]}
+            data-col-label={colLabels[matrixIndices[index][1]]}
+            data-cell-value={value}
           >
-            <title>{value}</title>
           </rect>
         ))}
       </g>
@@ -246,31 +189,7 @@ const Heatmap = ({
           </text>
         ))}
       </g>
-      {/* <g id="tooltip" visibility="hidden">
-        <rect
-          x={2}
-          y={2}
-          width={80}
-          height={24}
-          fill="black"
-          opacity={0.4}
-          rx={2}
-          ry={2}
-        />
-        <rect width={80} height={24} fill="white" opacity={0.4} rx={2} ry={2} />
-        <text id="tooltip-text" x={4} y={6}>
-          tooltip
-        </text>
-      </g> */}
-      <text
-        id="tooltip"
-        visibility="hidden"
-        // dominantBaseline="hanging"
-        overflow="visible"
-        fill="white"
-        fontSize={labelFontSize}
-        fontFamily="Roboto"
-      ></text>
+      <HeatmapTooltip />
     </>
   );
 };

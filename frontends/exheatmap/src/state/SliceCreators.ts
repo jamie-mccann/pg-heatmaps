@@ -25,7 +25,7 @@ export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
 export const createSvgCanvasSlice: StateCreator<SvgCanvasSlice> = (set) => ({
   svgRef: null,
   setSvgRef: (ref) => set({ svgRef: ref }),
-  height: 0,
-  width: 0,
-  setDimensions: (w, h) => set({ height: h, width: w }),
+  svgHeight: 0,
+  svgWidth: 0,
+  setDimensions: (w, h) => set({ svgHeight: h, svgWidth: w }),
 });
