@@ -99,12 +99,12 @@ const Heatmap = ({
       });
   }, [svgRef]);
 
-  const heatmapBounds = useMemo(() => ({
+  const heatmapBounds = {
     top: marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
     bottom: svgHeight - marginBottom,
     left: marginLeft,
     right: svgWidth - marginRight - rowTextLength - labelPadding,
-  }), [svgWidth, svgHeight]);
+  };
 
   const xAxisScale = useMemo(
     () =>
