@@ -4,12 +4,14 @@ import { useAppStore } from "../state/AppStore";
 
 export interface HeatmapTooltipSettings {
   defaultWidth?: number;
+  fontSize?: number;
   paddingLeft?: number;
   paddingRight?: number;
 }
 
 const HeatmapTooltip = ({
   defaultWidth = 100,
+  fontSize = 12,
   paddingLeft = 8,
   paddingRight = 8,
 }: HeatmapTooltipSettings) => {
@@ -41,7 +43,7 @@ const HeatmapTooltip = ({
       const tooltipHeight = 60; // Adjust based on tooltip size
 
       // Check if tooltip would overflow the SVG width and adjust x position
-      if (x + tooltipWidth > svgWidth) {
+      if (x + tooltipWidth + paddingLeft + paddingRight > svgWidth) {
         x -= tooltipWidth + 12; // Shift left if near right edge
       }
       // Check if tooltip would overflow the SVG height and adjust y position
@@ -169,7 +171,7 @@ const HeatmapTooltip = ({
         id="tooltip-row"
         fontFamily="Roboto"
         fontWeight="normal"
-        fontSize={10}
+        fontSize={fontSize}
         x={paddingLeft}
         y={13}
       >
@@ -179,7 +181,7 @@ const HeatmapTooltip = ({
         id="tooltip-col"
         fontFamily="Roboto"
         fontWeight="normal"
-        fontSize={10}
+        fontSize={fontSize}
         x={paddingLeft}
         y={33}
       >
@@ -189,7 +191,7 @@ const HeatmapTooltip = ({
         id="tooltip-cell"
         fontFamily="Roboto"
         fontWeight="normal"
-        fontSize={10}
+        fontSize={fontSize}
         x={paddingLeft}
         y={53}
       >
