@@ -33,6 +33,7 @@ export interface GeneInfo {
 export interface SampleInfo {
   experiment: string;
   sampleId: string;
+  reference: string;
   sequencingId: string;
   condition: string;
 }

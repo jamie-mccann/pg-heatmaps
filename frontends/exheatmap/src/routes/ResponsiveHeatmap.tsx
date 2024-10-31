@@ -109,7 +109,7 @@ const ResponsiveHeatmap = () => {
       (value) => `${value.chromosomeId}_${value.geneId}`
     ),
     colLabels: expressionData!.samples.map(
-      (value) => `${value.sampleId} ${value.condition}`
+      (value) => `${value.reference} ${value.condition}`
     ),
   };
 
