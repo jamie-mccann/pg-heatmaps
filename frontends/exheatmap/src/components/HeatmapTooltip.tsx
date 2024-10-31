@@ -21,7 +21,8 @@ const HeatmapTooltip = ({
   const svgHeight = useAppStore((state) => state.svgHeight);
   const svgWidth = useAppStore((state) => state.svgWidth);
   const tooltipRef = useRef<SVGGElement>(null);
-
+  const [visibility, setVisibility] = useState<"hidden" | "visible">("hidden");
+  const [transform, setTransform] = useState<string | undefined>(undefined);
   const [tooltipWidth, setTooltipWidth] = useState(defaultWidth);
 
   const tooltipHeight = 4 * linePadding + 3 * fontSize;
@@ -37,26 +38,8 @@ const HeatmapTooltip = ({
       event.preventDefault();
       if (tooltipRef.current === null) return;
 
+      // think this should always exist if svgRef.current !== null
       const CTM = svgCtm!;
-
-      let x = (event.pageX - CTM.e + 6) / CTM.a;
-      let y = (event.pageY - CTM.f + 20) / CTM.d;
-
-      // Check if tooltip would overflow the SVG width and adjust x position
-      if (x + tooltipWidth + paddingLeft + paddingRight > svgWidth) {
-        x -= tooltipWidth + 12; // Shift left if near right edge
-      }
-      // Check if tooltip would overflow the SVG height and adjust y position
-      if (y + tooltipHeight > svgHeight) {
-        y -= tooltipHeight + 24; // Shift up if near bottom edge
-      }
-
-      tooltipRef.current.setAttributeNS(
-        null,
-        "transform",
-        `translate(${x} ${y})`
-      );
-      tooltipRef.current.setAttributeNS(null, "visibility", "visible");
 
       // data-row-label, data-col-label, data-cell-value
       const tooltipRow =
@@ -108,17 +91,36 @@ const HeatmapTooltip = ({
         ? tooltipCell.getComputedTextLength()
         : -Infinity;
 
-      // default tooltip width is 200
-      setTooltipWidth(
-        Math.max(tooltipCellWidth, tooltipColWidth, tooltipRowWidth, 100) +
-          paddingLeft +
-          paddingRight
-      );
+      const calculatedTooltipWidth =
+        Math.max(
+          tooltipCellWidth,
+          tooltipColWidth,
+          tooltipRowWidth,
+          defaultWidth
+        ) +
+        paddingLeft +
+        paddingRight;
+
+      let x = (event.pageX - CTM.e + 6) / CTM.a;
+      let y = (event.pageY - CTM.f + 20) / CTM.d;
+
+      // Check if tooltip would overflow the SVG width and adjust x position
+      if (x + calculatedTooltipWidth + paddingLeft + paddingRight > svgWidth) {
+        x -= calculatedTooltipWidth + 12; // Shift left if near right edge
+      }
+      // Check if tooltip would overflow the SVG height and adjust y position
+      if (y + tooltipHeight > svgHeight) {
+        y -= tooltipHeight + 24; // Shift up if near bottom edge
+      }
+
+      setTooltipWidth(calculatedTooltipWidth);
+      setTransform(`translate(${x} ${y})`);
+      setVisibility("visible");
     };
 
     const hideTooltip = (event: MouseEvent) => {
       event.preventDefault();
-      tooltipRef.current?.setAttributeNS(null, "visibility", "hidden");
+      setVisibility("hidden");
     };
 
     Array.from(svg.getElementsByClassName("tooltip-trigger")).forEach(
@@ -145,7 +147,7 @@ const HeatmapTooltip = ({
   }, [svgRef, tooltipRef]);
 
   return (
-    <g ref={tooltipRef} id="tooltip" visibility="hidden">
+    <g ref={tooltipRef} id="tooltip" visibility={visibility} transform={transform}>
       {/* drop shadow */}
       <rect
         x={2}
