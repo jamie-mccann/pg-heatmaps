@@ -28,12 +28,16 @@ const GeneTableDisplay = () => {
     geneAnnotations.map((_) => true)
   );
 
+  const selectedGenes = useAppStore((state) => state.selectedGenes);
+  const setSelectedGenes = useAppStore((state) => state.setSelectedGenes);
+
   useEffect(() => {
     // we want to redirect to the "/" route if the user refreshes the page
     if (geneAnnotations.length === 0) navigate("/");
     // need to reset selected for geneAnnotations somehow
     // when submit button is clicked in the /gene-list route
     // either that or disable the submit button /gene-list
+    setSelectedGenes(geneAnnotations.map((_) => true));
   }, [geneAnnotations, navigate]);
 
   return (
@@ -71,9 +75,11 @@ const GeneTableDisplay = () => {
                     if (event.target.checked) {
                       // If checked, select all
                       setSelected(selected.map(() => true));
+                      setSelectedGenes(selectedGenes.map(() => true));
                     } else {
                       // If unchecked, deselect all
                       setSelected(selected.map(() => false));
+                      setSelectedGenes(selectedGenes.map(() => false));
                     }
                   }}
                 />
@@ -100,6 +106,12 @@ const GeneTableDisplay = () => {
                     newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
                   }
                   setSelected(newSelected); // Update the state
+                  const newSelectedGenes = [...selectedGenes];
+                  if (value.evalue !== null) {
+                    newSelectedGenes[index] = !selectedGenes[index]; // Toggle the selection state of this particular row
+                  }
+                  setSelectedGenes(newSelectedGenes); // Update the state
+
                 }}
                 sx={{ cursor: "pointer", color: "secondary" }}
               >
@@ -111,6 +123,11 @@ const GeneTableDisplay = () => {
                       const newSelected = [...selected];
                       newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
                       setSelected(newSelected); // Update the state
+                      const newSelectedGenes = [...selectedGenes];
+                      if (value.evalue !== null) {
+                        newSelectedGenes[index] = !selectedGenes[index]; // Toggle the selection state of this particular row
+                      }
+                      setSelectedGenes(newSelectedGenes); // Update the state
                     }}
                     disabled={value.evalue === null} // Disable checkbox if e-value is null
                   />

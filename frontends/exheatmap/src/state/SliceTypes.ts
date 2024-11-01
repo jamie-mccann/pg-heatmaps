@@ -12,6 +12,8 @@ export interface GenesSlice {
   setGeneIds: (ids: string[]) => void;
   geneAnnotations: GeneAnnotation[];
   setGeneAnnotations: (annotations: GeneAnnotation[]) => void;
+  selectedGenes: boolean[];
+  setSelectedGenes: (selected: boolean[]) => void;
 }
 
 export interface SvgCanvasSlice {
