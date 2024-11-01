@@ -134,7 +134,7 @@ const Heatmap = ({
     <>
       <rect
         id="svg-background"
-        fill="#121212"
+        fill="#1E1E1E"
         width={svgWidth}
         height={svgHeight}
         rx={5}

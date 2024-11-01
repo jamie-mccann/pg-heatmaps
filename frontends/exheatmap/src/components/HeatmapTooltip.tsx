@@ -17,14 +17,18 @@ const HeatmapTooltip = ({
   paddingLeft = 8,
   paddingRight = 8,
 }: HeatmapTooltipSettings) => {
+  // globally managed state
   const svgRef = useAppStore((state) => state.svgRef);
   const svgHeight = useAppStore((state) => state.svgHeight);
   const svgWidth = useAppStore((state) => state.svgWidth);
-  const tooltipRef = useRef<SVGGElement>(null);
+  // component locally managed state
   const [visibility, setVisibility] = useState<"hidden" | "visible">("hidden");
   const [transform, setTransform] = useState<string | undefined>(undefined);
   const [tooltipWidth, setTooltipWidth] = useState(defaultWidth);
 
+  const tooltipRef = useRef<SVGGElement>(null);
+
+  // tooltip has 3 text components, spacing between top (1) and bottom (1) and text (2)
   const tooltipHeight = 4 * linePadding + 3 * fontSize;
 
   useEffect(() => {
@@ -130,6 +134,7 @@ const HeatmapTooltip = ({
       }
     );
 
+    // cleanup and remove the event listeners on component unmount
     return () => {
       Array.from(svg.getElementsByClassName("tooltip-trigger")).forEach(
         (value) => {
