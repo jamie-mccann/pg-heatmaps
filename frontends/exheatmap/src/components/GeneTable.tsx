@@ -148,9 +148,6 @@ const GeneTable = ({
                   />
                 </TableCell>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  {value.genus} {value.species}
-                </TableCell>
                 <TableCell>{value.chromosomeId}</TableCell>
                 <TableCell>{value.geneId}</TableCell>
                 <TableCell>{value.tool}</TableCell>
