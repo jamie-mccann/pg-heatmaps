@@ -13,12 +13,11 @@ export interface ExpressionRequest {
 export interface GeneAnnotation {
   chromosomeId: string;
   geneId: string;
-  genus: string;
-  species: string;
   tool: string;
-  description: string;
   evalue: number;
   score: number;
+  seed_ortholog: string;
+  description: string;
 }
 
 export interface AnnotationsResponse {
@@ -33,6 +32,7 @@ export interface GeneInfo {
 export interface SampleInfo {
   experiment: string;
   sampleId: string;
+  reference: string;
   sequencingId: string;
   condition: string;
 }
@@ -53,3 +53,28 @@ export const ExperimentTitleToId: { [key: string]: number } = {
   "Pinus sylvestris Drought Stress Roots": 7,
   "Pinus sylvestris Drought Stress Needles": 8,
 };
+
+export interface HeatmapMarginConfig {
+  marginTop: number;
+  marginBottom: number;
+  marginLeft: number;
+  marginRight: number;
+}
+
+export interface HeatmapLabelConfig {
+  labelFontSize: number;
+  labelPadding: number;
+}
+
+export interface HeatmapCellConfig {
+  cellPadding: number;
+}
+
+export interface HeatmapSettings {
+  marginConfig: HeatmapMarginConfig;
+  labelConfig: HeatmapLabelConfig;
+  cellConfig: HeatmapCellConfig;
+  data: number[],
+  rowLabels: string[],
+  colLabels: string[]
+}

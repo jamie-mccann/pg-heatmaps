@@ -68,7 +68,8 @@ class GeneList(BaseModel):
 
 class SampleInfo(PlantGenieModel):
     experiment: str
-    sample_id: str = Field(alias="sampleId")
+    sample_id: int = Field(alias="sampleId")
+    reference: str
     sequencing_id: str = Field(alias="sequencingId")
     condition: str
 

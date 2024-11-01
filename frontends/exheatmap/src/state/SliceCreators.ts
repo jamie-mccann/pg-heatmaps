@@ -9,8 +9,8 @@ export const createHeatmapSlice: StateCreator<
 > = (set) => ({
   species: null,
   experiment: null,
-  setSpecies: (newSpecies) => set({ species: newSpecies}),
-  setExperiment: (newExperiment) => set({ experiment: newExperiment}),
+  setSpecies: (newSpecies) => set({ species: newSpecies }),
+  setExperiment: (newExperiment) => set({ experiment: newExperiment }),
 });
 
 export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
@@ -18,14 +18,21 @@ export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
 ) => ({
   geneIds: [],
   geneAnnotations: [],
+  selectedGenes: [],
   setGeneIds: (ids) => set({ geneIds: ids }),
-  setGeneAnnotations: (annotations) => set({ geneAnnotations: annotations }),
+  // setGeneAnnotations: (annotations) => set({ geneAnnotations: annotations }),
+  setGeneAnnotations: (annotations) =>
+    set({
+      geneAnnotations: annotations,
+      selectedGenes: annotations.map(() => true),
+    }),
+  setSelectedGenes: (selected) => set({ selectedGenes: selected }),
 });
 
 export const createSvgCanvasSlice: StateCreator<SvgCanvasSlice> = (set) => ({
   svgRef: null,
   setSvgRef: (ref) => set({ svgRef: ref }),
-  height: 0,
-  width: 0,
-  setDimensions: (w, h) => set({ height: h, width: w }),
+  svgHeight: 0,
+  svgWidth: 0,
+  setDimensions: (w, h) => set({ svgHeight: h, svgWidth: w }),
 });

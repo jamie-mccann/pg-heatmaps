@@ -15,6 +15,7 @@ import Index from "./routes/Index";
 import GeneTableDisplay, {
   loader as geneTableLoader,
 } from "./routes/GeneTableDisplay";
+import ResponsiveHeatmap from "./routes/ResponsiveHeatmap";
 
 import Heatmap from "./routes/Heatmap";
 
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
       {
         path: "heatmap",
         element: <Heatmap />,
+      },
+      {
+        path: "responsive-heatmap",
+        element: <ResponsiveHeatmap />
       },
       { path: "network", element: <div>Network</div> },
     ],

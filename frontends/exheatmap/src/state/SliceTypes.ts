@@ -12,12 +12,14 @@ export interface GenesSlice {
   setGeneIds: (ids: string[]) => void;
   geneAnnotations: GeneAnnotation[];
   setGeneAnnotations: (annotations: GeneAnnotation[]) => void;
+  selectedGenes: boolean[];
+  setSelectedGenes: (selected: boolean[]) => void;
 }
 
 export interface SvgCanvasSlice {
   svgRef: React.RefObject<SVGSVGElement> | null;
   setSvgRef: (ref: React.RefObject<SVGSVGElement>) => void;
-  height: number;
-  width: number;
+  svgHeight: number;
+  svgWidth: number;
   setDimensions: (w: number, h: number) => void;
 }
