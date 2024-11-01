@@ -13,12 +13,11 @@ export interface ExpressionRequest {
 export interface GeneAnnotation {
   chromosomeId: string;
   geneId: string;
-  genus: string;
-  species: string;
   tool: string;
-  description: string;
   evalue: number;
   score: number;
+  seed_ortholog: string;
+  description: string;
 }
 
 export interface AnnotationsResponse {

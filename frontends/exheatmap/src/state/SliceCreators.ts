@@ -20,7 +20,12 @@ export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
   geneAnnotations: [],
   selectedGenes: [],
   setGeneIds: (ids) => set({ geneIds: ids }),
-  setGeneAnnotations: (annotations) => set({ geneAnnotations: annotations }),
+  // setGeneAnnotations: (annotations) => set({ geneAnnotations: annotations }),
+  setGeneAnnotations: (annotations) =>
+    set({
+      geneAnnotations: annotations,
+      selectedGenes: annotations.map(() => true),
+    }),
   setSelectedGenes: (selected) => set({ selectedGenes: selected }),
 });
 

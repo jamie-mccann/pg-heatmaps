@@ -15,9 +15,10 @@ import SvgCanvas from "../components/SvgCanvas";
 import Heatmap from "../components/Heatmap";
 
 const ResponsiveHeatmap = () => {
-  const geneAnnotations = useAppStore((state) => state.geneAnnotations);
   const species = useAppStore((state) => state.species);
   const experiment = useAppStore((state) => state.experiment);
+  const geneAnnotations = useAppStore((state) => state.geneAnnotations);
+  const selectedGenes = useAppStore((state) => state.selectedGenes);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
@@ -36,9 +37,9 @@ const ResponsiveHeatmap = () => {
       species: species!, // species has to be set here, no?
       clustering: "none",
       experimentId: ExperimentTitleToId[`${species} ${experiment}`],
-      geneIds: geneAnnotations.map(
-        (value) => `${value.chromosomeId}_${value.geneId}`
-      ),
+      geneIds: geneAnnotations
+        .filter((_, index) => selectedGenes[index])
+        .map((value) => `${value.chromosomeId}_${value.geneId}`),
     };
 
     const fetchData = async () => {

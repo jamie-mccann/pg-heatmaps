@@ -37,8 +37,7 @@ const GeneTableDisplay = () => {
     // need to reset selected for geneAnnotations somehow
     // when submit button is clicked in the /gene-list route
     // either that or disable the submit button /gene-list
-    setSelectedGenes(geneAnnotations.map((_) => true));
-  }, [geneAnnotations, navigate]);
+  }, [geneAnnotations]);
 
   return (
     <Grid container spacing={2}>
@@ -64,28 +63,25 @@ const GeneTableDisplay = () => {
                 <Checkbox
                   color="secondary"
                   checked={
-                    selected.filter((value) => value).length ===
-                      selected.length && selected.length > 0
+                    selectedGenes.filter((value) => value).length ===
+                      selectedGenes.length && selectedGenes.length > 0
                   } // Fully checked if all are selected
                   indeterminate={
-                    selected.filter((value) => value).length > 0 &&
-                    selected.filter((value) => value).length !== selected.length
+                    selectedGenes.filter((value) => value).length > 0 &&
+                    selectedGenes.filter((value) => value).length !== selectedGenes.length
                   } // Indeterminate if some but not all are selected
                   onChange={(event) => {
                     if (event.target.checked) {
                       // If checked, select all
-                      setSelected(selected.map(() => true));
                       setSelectedGenes(selectedGenes.map(() => true));
                     } else {
                       // If unchecked, deselect all
-                      setSelected(selected.map(() => false));
                       setSelectedGenes(selectedGenes.map(() => false));
                     }
                   }}
                 />
               </TableCell>
               <TableCell>Number</TableCell>
-              <TableCell>Species</TableCell>
               <TableCell>Chromosome ID</TableCell>
               <TableCell>Gene ID</TableCell>
               <TableCell>Tool</TableCell>
@@ -99,13 +95,8 @@ const GeneTableDisplay = () => {
               <TableRow
                 key={index}
                 hover
-                selected={selected[index] && value.evalue !== null}
+                selected={selectedGenes[index] && value.evalue !== null}
                 onClick={() => {
-                  const newSelected = [...selected];
-                  if (value.evalue !== null) {
-                    newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
-                  }
-                  setSelected(newSelected); // Update the state
                   const newSelectedGenes = [...selectedGenes];
                   if (value.evalue !== null) {
                     newSelectedGenes[index] = !selectedGenes[index]; // Toggle the selection state of this particular row
@@ -118,7 +109,8 @@ const GeneTableDisplay = () => {
                 <TableCell padding="checkbox">
                   <Checkbox
                     color="secondary"
-                    checked={selected[index] && value.evalue !== null}
+                    // checked={selected[index] && value.evalue !== null}
+                    checked={selectedGenes[index]}
                     onChange={() => {
                       const newSelected = [...selected];
                       newSelected[index] = !selected[index]; // Toggle the selection state of this particular row
@@ -133,9 +125,6 @@ const GeneTableDisplay = () => {
                   />
                 </TableCell>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  {value.genus} {value.species}
-                </TableCell>
                 <TableCell>{value.chromosomeId}</TableCell>
                 <TableCell>{value.geneId}</TableCell>
                 <TableCell>{value.tool}</TableCell>
