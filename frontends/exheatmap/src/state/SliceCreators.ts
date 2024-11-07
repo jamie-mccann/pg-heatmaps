@@ -9,8 +9,14 @@ export const createHeatmapSlice: StateCreator<
 > = (set) => ({
   species: null,
   experiment: null,
+  scaler: "log",
+  metric: "euclidean",
+  linkage: "ward",
   setSpecies: (newSpecies) => set({ species: newSpecies }),
   setExperiment: (newExperiment) => set({ experiment: newExperiment }),
+  setScaler: (newScaler: string) => set({ scaler: newScaler }),
+  setMetric: (newMetric) => set({ metric: newMetric }),
+  setLinkage: (newLinkage) => set({ linkage: newLinkage }),
 });
 
 export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
@@ -35,4 +41,6 @@ export const createSvgCanvasSlice: StateCreator<SvgCanvasSlice> = (set) => ({
   svgHeight: 0,
   svgWidth: 0,
   setDimensions: (w, h) => set({ svgHeight: h, svgWidth: w }),
+  setSvgHeight: (h) => set({ svgHeight: h }),
+  setSvgWidth: (w) => set({ svgWidth: w }),
 });

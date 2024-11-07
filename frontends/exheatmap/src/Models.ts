@@ -68,6 +68,7 @@ export interface HeatmapLabelConfig {
 
 export interface HeatmapCellConfig {
   cellPadding: number;
+  cellHeight: number;
 }
 
 export interface HeatmapSettings {

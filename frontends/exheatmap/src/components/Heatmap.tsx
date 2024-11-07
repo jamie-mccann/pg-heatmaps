@@ -1,21 +1,27 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 
-import { interpolateRdYlBu, range } from "d3";
+import { range } from "d3";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
+import { interpolateRdYlBu } from "d3-scale-chromatic";
 
 import { useAppStore } from "../state/AppStore";
 import { HeatmapSettings } from "../Models";
 import HeatmapTooltip from "./HeatmapTooltip";
+import { DataScalers } from "../utils/Scalers";
+import { hierarchicalClusteringUI } from "../utils/Clustering";
 
 const Heatmap = ({
   marginConfig: { marginTop, marginBottom, marginLeft, marginRight },
   labelConfig: { labelFontSize, labelPadding },
-  cellConfig: { cellPadding },
+  cellConfig: { cellPadding, cellHeight },
   data,
   rowLabels,
   colLabels,
 }: HeatmapSettings) => {
+  const dataScaler = useAppStore((state) => state.scaler);
+  const clusteringMetric = useAppStore((state) => state.metric);
+  const clusteringLinkage = useAppStore((state) => state.linkage);
   const svgRef = useAppStore((state) => state.svgRef);
   const svgWidth = useAppStore((state) => state.svgWidth);
   const svgHeight = useAppStore((state) => state.svgHeight);
@@ -61,6 +67,15 @@ const Heatmap = ({
     });
 
     setColTextLength(Math.max(...yTextLengths));
+
+    const newSvgHeight =
+      marginBottom +
+      marginTop +
+      Math.max(...yTextLengths) * Math.sin(Math.PI / 4) +
+      labelPadding +
+      cellHeight * rowLabels.length;
+    cellPadding * (rowLabels.length + 1);
+    console.log(`New SVG Height: ${newSvgHeight}`);
 
     document.body.removeChild(hiddenSvg);
   }, []);
@@ -130,6 +145,40 @@ const Heatmap = ({
     [rowLabels, colLabels]
   );
 
+  const scaledData = DataScalers[dataScaler].function({
+    data,
+    ncols: colLabels.length,
+    nrows: rowLabels.length,
+  });
+
+  const clustering = hierarchicalClusteringUI(
+    Array.from({ length: rowLabels.length }, (_, rowIndex) =>
+      scaledData.slice(
+        rowIndex * colLabels.length,
+        (rowIndex + 1) * colLabels.length
+      )
+    ),
+    clusteringMetric,
+    clusteringLinkage
+  );
+
+  const orderedRowLabels = Array.from(
+    { length: rowLabels.length },
+    (_, index) => rowLabels[index]
+  );
+
+  const orderedColLabels = Array.from(
+    { length: colLabels.length },
+    (_, index) => colLabels[index]
+  );
+
+  const clusteredData = clustering.flatMap((_, rowIndex) =>
+    scaledData.slice(
+      rowIndex * colLabels.length,
+      (rowIndex + 1) * colLabels.length
+    )
+  );
+
   return (
     <>
       <rect
@@ -161,7 +210,7 @@ const Heatmap = ({
             y={yAxisScale(matrixIndices[index][0])}
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
             height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
-            fill={interpolateRdYlBu(value)}
+            fill={interpolateRdYlBu(scaledData[index])}
             strokeWidth={1}
             stroke="white"
             data-row-label={rowLabels[matrixIndices[index][0]]}

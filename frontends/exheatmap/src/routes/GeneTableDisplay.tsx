@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
+import IconButton from "@mui/material/IconButton";
 import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
 import Table from "@mui/material/Table";
@@ -10,6 +11,8 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+
+import SortIcon from "@mui/icons-material/Sort";
 
 import { LoaderFunction, useLoaderData, useNavigate } from "react-router-dom";
 
@@ -68,7 +71,8 @@ const GeneTableDisplay = () => {
                   } // Fully checked if all are selected
                   indeterminate={
                     selectedGenes.filter((value) => value).length > 0 &&
-                    selectedGenes.filter((value) => value).length !== selectedGenes.length
+                    selectedGenes.filter((value) => value).length !==
+                      selectedGenes.length
                   } // Indeterminate if some but not all are selected
                   onChange={(event) => {
                     if (event.target.checked) {
@@ -81,7 +85,13 @@ const GeneTableDisplay = () => {
                   }}
                 />
               </TableCell>
-              <TableCell>Number</TableCell>
+              <TableCell>
+                <Grid container>
+                  {/* <Typography>Number</Typography> */}
+                  Number
+                  <IconButton><SortIcon fontSize="small"/></IconButton>
+                </Grid>
+              </TableCell>
               <TableCell>Chromosome ID</TableCell>
               <TableCell>Gene ID</TableCell>
               <TableCell>Tool</TableCell>
@@ -102,7 +112,6 @@ const GeneTableDisplay = () => {
                     newSelectedGenes[index] = !selectedGenes[index]; // Toggle the selection state of this particular row
                   }
                   setSelectedGenes(newSelectedGenes); // Update the state
-
                 }}
                 sx={{ cursor: "pointer", color: "secondary" }}
               >

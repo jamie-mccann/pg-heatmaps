@@ -1,7 +1,15 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { Paper, Typography } from "@mui/material";
+import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormLabel from "@mui/material/FormLabel";
+import Radio from "@mui/material/Radio";
+import RadioGroup from "@mui/material/RadioGroup";
+
+import Grid from "@mui/material/Grid2";
+import Typography from "@mui/material/Typography";
+import Paper from "@mui/material/Paper";
 
 import { useAppStore } from "../state/AppStore";
 import {
@@ -19,6 +27,8 @@ const ResponsiveHeatmap = () => {
   const experiment = useAppStore((state) => state.experiment);
   const geneAnnotations = useAppStore((state) => state.geneAnnotations);
   const selectedGenes = useAppStore((state) => state.selectedGenes);
+  const dataScaler = useAppStore((state) => state.scaler);
+  const setDataScaler = useAppStore((state) => state.setScaler);
   const [isLoading, setIsLoading] = useState(true);
   const [loadingError, setLoadingError] = useState<string | null>(null);
 
@@ -104,6 +114,7 @@ const ResponsiveHeatmap = () => {
     },
     cellConfig: {
       cellPadding: 1,
+      cellHeight: 30,
     },
     data: expressionData!.values,
     rowLabels: expressionData!.genes.map(
@@ -114,25 +125,59 @@ const ResponsiveHeatmap = () => {
     ),
   };
 
+  const handleScalerChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setDataScaler((event.target as HTMLInputElement).value);
+  };
+
   return (
-    <Paper
-      id="svg-container-2"
-      className="svg-container"
-      sx={{
-        height: "800px",
-        width: "100%",
-      }}
-    >
-      <SvgCanvas>
-        <Heatmap
-          marginConfig={heatMapSettings.marginConfig}
-          labelConfig={heatMapSettings.labelConfig}
-          cellConfig={heatMapSettings.cellConfig}
-          data={heatMapSettings.data}
-          rowLabels={heatMapSettings.rowLabels}
-          colLabels={heatMapSettings.colLabels}
-        />
-      </SvgCanvas>
+    <Paper>
+      <Grid container flexDirection="column">
+        <Grid padding={2} spacing={1}>
+          <FormControl>
+            <FormLabel id="demo-radio-buttons-group-label">Scaling</FormLabel>
+            <RadioGroup
+              row={true}
+              aria-labelledby="demo-radio-buttons-group-label"
+              defaultValue="matrix"
+              name="radio-buttons-group"
+              value={dataScaler}
+              onChange={handleScalerChange}
+            >
+              <FormControlLabel value="row" control={<Radio />} label="Row" />
+              <FormControlLabel
+                value="column"
+                control={<Radio />}
+                label="Column"
+              />
+              <FormControlLabel
+                value="zscore"
+                control={<Radio />}
+                label="Zscore"
+              />
+              <FormControlLabel value="log" control={<Radio />} label="Log2" />
+              <FormControlLabel value="none" control={<Radio />} label="None" />
+            </RadioGroup>
+          </FormControl>
+        </Grid>
+        <Grid
+          id="svg-container-3"
+          className="svg-container"
+          size={{ xs: 12 }}
+          height="2500px"
+          width="100%"
+        >
+          <SvgCanvas>
+            <Heatmap
+              marginConfig={heatMapSettings.marginConfig}
+              labelConfig={heatMapSettings.labelConfig}
+              cellConfig={heatMapSettings.cellConfig}
+              data={heatMapSettings.data}
+              rowLabels={heatMapSettings.rowLabels}
+              colLabels={heatMapSettings.colLabels}
+            />
+          </SvgCanvas>
+        </Grid>
+      </Grid>
     </Paper>
   );
 };
