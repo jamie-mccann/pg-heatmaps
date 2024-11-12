@@ -58,7 +58,7 @@ async def api_root():
 
 @app.post("/api/annotations")
 async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResponse:
-    if len(request.gene_ids == 0):
+    if len(request.gene_ids) == 0:
         return AnnotationsResponse(results=[])
 
     gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
