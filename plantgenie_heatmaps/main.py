@@ -58,6 +58,9 @@ async def api_root():
 
 @app.post("/api/annotations")
 async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResponse:
+    if len(request.gene_ids == 0):
+        return AnnotationsResponse(results=[])
+
     gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
 
     # Map gene_ids to their original order for sorting results later
@@ -111,6 +114,9 @@ async def get_annotations_duckdb(request: AnnotationsRequest) -> AnnotationsResp
 
 @app.post("/api/expression")
 async def get_expression_duckdb(request: ExpressionRequest) -> ExpressionResponse:
+    if len(request.gene_ids) == 0:
+        return ExpressionResponse(genes=[], samples=[], values=[])
+
     gene_ids = GeneInfo.split_gene_ids_from_request(request.gene_ids)
 
     gene_id_order = {
