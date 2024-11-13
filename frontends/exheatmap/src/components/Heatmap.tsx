@@ -9,7 +9,7 @@ import { useAppStore } from "../state/AppStore";
 import { HeatmapSettings } from "../Models";
 import HeatmapTooltip from "./HeatmapTooltip";
 import { DataScalers } from "../utils/Scalers";
-import { hierarchicalClusteringUI } from "../utils/Clustering";
+import { hierarchicalClustering } from "../services/clustering/cluster";
 
 const Heatmap = ({
   marginConfig: { marginTop, marginBottom, marginLeft, marginRight },
@@ -151,16 +151,17 @@ const Heatmap = ({
     nrows: rowLabels.length,
   });
 
-  const clustering = hierarchicalClusteringUI(
-    Array.from({ length: rowLabels.length }, (_, rowIndex) =>
+  const clustering = hierarchicalClustering({
+    data: Array.from({ length: rowLabels.length }, (_, rowIndex) =>
       scaledData.slice(
         rowIndex * colLabels.length,
         (rowIndex + 1) * colLabels.length
       )
     ),
-    clusteringMetric,
-    clusteringLinkage
-  );
+    distanceMetric: clusteringMetric,
+    linkageMetric: clusteringLinkage,
+    by: "row",
+  });
 
   const orderedRowLabels = Array.from(
     { length: rowLabels.length },
