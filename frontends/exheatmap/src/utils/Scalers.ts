@@ -1,4 +1,5 @@
 import { scaleLinear } from "d3-scale";
+import { getVectors } from "../services/clustering/utils";
 
 const arrayRange = (start: number, stop: number, step: number): number[] =>
   Array.from(
@@ -20,13 +21,14 @@ interface Scaler {
 const rowScaler = ({ data, nrows, ncols }: ScalerArgs): number[] => {
   return arrayRange(0, nrows * ncols - 1, ncols).flatMap((value) => {
     const dataSlice = data.slice(value, value + ncols);
-    const min = Math.min(...dataSlice);
-    const max = Math.max(...dataSlice);
+    const filteredDataSlice =
+      dataSlice.filter((value) => value !== 0).length === 0
+        ? Array.from({ length: dataSlice.length }, (_, __) => Number.NaN)
+        : dataSlice;
+    const min = Math.min(...filteredDataSlice);
+    const max = Math.max(...filteredDataSlice);
     const mapper = scaleLinear([min, max], [0, 1]);
     return dataSlice.map((value) => 1 - mapper(value));
-    // return max === 0
-    //   ? dataSlice.map((_) => 1)
-    //   : dataSlice.map((value) => 1 - value / max);
   });
 };
 
@@ -60,7 +62,10 @@ const columnScaler = ({ data, nrows, ncols }: ScalerArgs): number[] => {
 
 const logScaler = ({ data }: ScalerArgs): number[] => {
   const logData = data.map((value) => Math.log2(value + 1));
-  const unitIntervalMap = scaleLinear([0, Math.max(...logData)], [0, 1]);
+  const unitIntervalMap = scaleLinear(
+    [Math.min(...logData), Math.max(...logData)],
+    [0, 1]
+  );
   return logData.map((value) => 1 - unitIntervalMap(value));
 };
 
@@ -69,25 +74,38 @@ const noneScaler = ({ data }: ScalerArgs): number[] => {
   return data.map((value) => 1 - unitIntervalMap(value));
 };
 
-const zScoreScaler = ({ data }: ScalerArgs): number[] => {
+const zScoreScaler = ({ data, nrows, ncols }: ScalerArgs): number[] => {
   const logScaledData = data.map((value) => Math.log2(value + 1));
-  const mean =
-    logScaledData.reduce((sum, currentValue) => sum + currentValue, 0) /
-    data.length;
-  const variance =
-    logScaledData.reduce(
-      (sum, currentValue) => sum + (currentValue - mean) ** 2,
-      0
-    ) / data.length;
-  const zScaledData = logScaledData.map(
-    (value) => (value - mean) / Math.sqrt(variance)
+  // const logScaledData = data;
+  const dataVectors = getVectors(logScaledData, nrows, ncols, "row");
+  const meanVectors = dataVectors.map(
+    (value) =>
+      value.reduce((sum, currentValue) => sum + currentValue, 0) / value.length
   );
-  // const mapper = scaleLinear(
-  //   [Math.min(...zScaledData), Math.max(...zScaledData)],
-  //   [0, 1]
-  // );
-  // return zScaledData.map((value) => 1 - mapper(value));
-  return zScaledData;
+
+  const varianceVectors = dataVectors.map((value, index) =>
+    value.reduce(
+      (sum, currentValue) => sum + (currentValue - meanVectors[index]) ** 2
+    )
+  );
+
+  const zScaledDataVectors = dataVectors.map((value, index) =>
+    value.map((innerValue) =>
+      varianceVectors[index] !== 0
+        ? (innerValue - meanVectors[index]) / Math.sqrt(varianceVectors[index])
+        : Number.NaN
+    )
+  );
+
+  const mappers = zScaledDataVectors.map((value) =>
+    scaleLinear([Math.min(...value), Math.max(...value)], [0, 1])
+  );
+
+  return zScaledDataVectors
+    .map((value, index) =>
+      value.map((innerValue) => 1 - mappers[index](innerValue))
+    )
+    .flat();
 };
 
 export const DataScalers: Record<string, Scaler> = {
