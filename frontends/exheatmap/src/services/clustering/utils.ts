@@ -42,6 +42,17 @@ export const reshapeData = (
   );
 };
 
+export const reshapedDataMap = (rowOrder: number[], colOrder: number[]) => {
+  const nrows = rowOrder.length;
+  const ncols = colOrder.length;
+  const indices = Array.from({ length: nrows * ncols }, (_, index) => index);
+
+  return rowOrder.flatMap((rowIndex) =>
+    colOrder.map((colIndex) => indices[rowIndex * ncols + colIndex])
+  );
+};
+
+
 export const findNodesToMerge = (
   nodes: Node[],
   dataMatrix: number[][],

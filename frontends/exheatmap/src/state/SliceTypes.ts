@@ -43,9 +43,10 @@ export interface ExpressionSlice {
 export interface ClusteringSlice {
   metric: string;
   linkage: string;
-  clusterBy: string;
+  axis: string;
   clusteringRowOrder: number[];
   clusteringColOrder: number[];
   setMetric: (newMetric: string) => void;
   setLinkage: (newLinkage: string) => void;
+  setAxis: (newAxis: string) => void;
 }

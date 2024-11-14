@@ -67,9 +67,10 @@ export const createClusteringSlice: StateCreator<
 > = (set) => ({
   metric: "euclidean",
   linkage: "ward",
-  clusterBy: "both",
+  axis: "row",
   clusteringRowOrder: [],
   clusteringColOrder: [],
   setMetric: (newMetric: string) => set({ metric: newMetric }),
   setLinkage: (newLinkage: string) => set({ linkage: newLinkage }),
+  setAxis: (newAxis: string) => set({ axis: newAxis }),
 });

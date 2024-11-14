@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 
+import Typography from "@mui/material/Typography";
+
 import { range } from "d3";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
@@ -20,6 +22,7 @@ const Heatmap = ({
   colLabels,
 }: HeatmapSettings) => {
   const dataScaler = useAppStore((state) => state.scaler);
+  const clusteringAxis = useAppStore((state) => state.axis);
   const clusteringMetric = useAppStore((state) => state.metric);
   const clusteringLinkage = useAppStore((state) => state.linkage);
   const svgRef = useAppStore((state) => state.svgRef);
@@ -151,34 +154,38 @@ const Heatmap = ({
     nrows: rowLabels.length,
   });
 
-  const clustering = hierarchicalClustering({
-    data: Array.from({ length: rowLabels.length }, (_, rowIndex) =>
-      scaledData.slice(
-        rowIndex * colLabels.length,
-        (rowIndex + 1) * colLabels.length
-      )
-    ),
-    distanceMetric: clusteringMetric,
-    linkageMetric: clusteringLinkage,
-    by: "row",
-  });
+  // const clustering = hierarchicalClustering({
+  //   data: Array.from({ length: rowLabels.length }, (_, rowIndex) =>
+  //     scaledData.slice(
+  //       rowIndex * colLabels.length,
+  //       (rowIndex + 1) * colLabels.length
+  //     )
+  //   ),
+  //   distanceMetric: clusteringMetric,
+  //   linkageMetric: clusteringLinkage,
+  //   by: "row",
+  // });
 
-  const orderedRowLabels = Array.from(
-    { length: rowLabels.length },
-    (_, index) => rowLabels[index]
-  );
+  // const orderedRowLabels = Array.from(
+  //   { length: rowLabels.length },
+  //   (_, index) => rowLabels[index]
+  // );
 
-  const orderedColLabels = Array.from(
-    { length: colLabels.length },
-    (_, index) => colLabels[index]
-  );
+  // const orderedColLabels = Array.from(
+  //   { length: colLabels.length },
+  //   (_, index) => colLabels[index]
+  // );
 
-  const clusteredData = clustering.flatMap((_, rowIndex) =>
-    scaledData.slice(
-      rowIndex * colLabels.length,
-      (rowIndex + 1) * colLabels.length
-    )
-  );
+  // const clusteredData = clustering.flatMap((_, rowIndex) =>
+  //   scaledData.slice(
+  //     rowIndex * colLabels.length,
+  //     (rowIndex + 1) * colLabels.length
+  //   )
+  // );
+
+  if (svgWidth === 0 || rowTextLength === 0) {
+    return <Typography variant="h3">Rendering heatmap ...</Typography>;
+  }
 
   return (
     <>
