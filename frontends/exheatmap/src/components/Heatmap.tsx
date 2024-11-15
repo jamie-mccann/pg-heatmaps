@@ -12,6 +12,11 @@ import { HeatmapSettings } from "../Models";
 import HeatmapTooltip from "./HeatmapTooltip";
 import { DataScalers } from "../utils/Scalers";
 import { hierarchicalClustering } from "../services/clustering/cluster";
+import {
+  getVectors,
+  reshapeData,
+  reshapedDataMap,
+} from "../services/clustering/utils";
 
 const Heatmap = ({
   marginConfig: { marginTop, marginBottom, marginLeft, marginRight },
@@ -28,8 +33,14 @@ const Heatmap = ({
   const svgRef = useAppStore((state) => state.svgRef);
   const svgWidth = useAppStore((state) => state.svgWidth);
   const svgHeight = useAppStore((state) => state.svgHeight);
+  // local state
   const [rowTextLength, setRowTextLength] = useState<number>(0);
   const [colTextLength, setColTextLength] = useState<number>(0);
+  // local data state
+  const [values, setValues] = useState<number[]>([]);
+  const [rowOrder, setRowOrder] = useState<number[]>([]);
+  const [colOrder, setColOrder] = useState<number[]>([]);
+  const [valueOrder, setValueOrder] = useState<number[]>([]);
 
   useLayoutEffect(() => {
     const hiddenSvg = document.createElementNS(
@@ -83,6 +94,63 @@ const Heatmap = ({
     document.body.removeChild(hiddenSvg);
   }, []);
 
+  // clustering effect
+  useEffect(() => {
+    const scaledData = DataScalers[dataScaler].function({
+      data: data,
+      nrows: rowLabels.length,
+      ncols: colLabels.length,
+    });
+    const newRowOrder =
+      clusteringAxis === "row" || clusteringAxis === "both"
+        ? hierarchicalClustering({
+            data: getVectors(
+              scaledData,
+              rowLabels.length,
+              colLabels.length,
+              "row"
+            ),
+            distanceMetric: clusteringMetric,
+            linkageMetric: clusteringLinkage,
+            by: "row",
+          })
+        : Array.from({ length: rowLabels.length }, (_, index) => index);
+
+    const newColOrder =
+      clusteringAxis === "col" || clusteringAxis === "both"
+        ? hierarchicalClustering({
+            data: getVectors(
+              DataScalers[dataScaler].function({
+                data: data,
+                nrows: rowLabels.length,
+                ncols: colLabels.length,
+              }),
+              rowLabels.length,
+              colLabels.length,
+              "col"
+            ),
+            distanceMetric: clusteringMetric,
+            linkageMetric: clusteringLinkage,
+            by: "col",
+          })
+        : Array.from({ length: colLabels.length }, (_, index) => index);
+
+
+    setRowOrder(newRowOrder);
+    setColOrder(newColOrder);
+    const dataReshaped = reshapeData(scaledData, newRowOrder, newColOrder);
+    setValues(dataReshaped);
+    setValueOrder(reshapedDataMap(newRowOrder, newColOrder));
+  }, [
+    svgRef,
+    dataScaler,
+    clusteringAxis,
+    clusteringMetric,
+    clusteringLinkage,
+    data,
+  ]);
+
+  // d3 animations effect
   useEffect(() => {
     if (svgRef === null) return;
 
@@ -115,7 +183,7 @@ const Heatmap = ({
       .on("mouseleave", function () {
         select(this).transition().duration(300).attr("font-weight", "normal");
       });
-  }, [svgRef]);
+  }, [svgRef, rowOrder, colOrder, valueOrder]);
 
   const heatmapBounds = {
     top: marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
@@ -148,40 +216,15 @@ const Heatmap = ({
     [rowLabels, colLabels]
   );
 
-  const scaledData = DataScalers[dataScaler].function({
-    data,
-    ncols: colLabels.length,
-    nrows: rowLabels.length,
-  });
+  const orderedRowLabels = rowOrder.map((value) => rowLabels[value]);
 
-  // const clustering = hierarchicalClustering({
-  //   data: Array.from({ length: rowLabels.length }, (_, rowIndex) =>
-  //     scaledData.slice(
-  //       rowIndex * colLabels.length,
-  //       (rowIndex + 1) * colLabels.length
-  //     )
-  //   ),
-  //   distanceMetric: clusteringMetric,
-  //   linkageMetric: clusteringLinkage,
-  //   by: "row",
+  const orderedColLabels = colOrder.map((value) => colLabels[value]);
+
+  // const scaledData = DataScalers[dataScaler].function({
+  //   data,
+  //   ncols: colLabels.length,
+  //   nrows: rowLabels.length,
   // });
-
-  // const orderedRowLabels = Array.from(
-  //   { length: rowLabels.length },
-  //   (_, index) => rowLabels[index]
-  // );
-
-  // const orderedColLabels = Array.from(
-  //   { length: colLabels.length },
-  //   (_, index) => colLabels[index]
-  // );
-
-  // const clusteredData = clustering.flatMap((_, rowIndex) =>
-  //   scaledData.slice(
-  //     rowIndex * colLabels.length,
-  //     (rowIndex + 1) * colLabels.length
-  //   )
-  // );
 
   if (svgWidth === 0 || rowTextLength === 0) {
     return <Typography variant="h3">Rendering heatmap ...</Typography>;
@@ -210,7 +253,7 @@ const Heatmap = ({
         height={heatmapBounds.bottom - heatmapBounds.top + 1}
       ></rect>
       <g id="rectangles">
-        {data.map((value, index) => (
+        {data.map((_, index) => (
           <rect
             className="tooltip-trigger"
             key={index}
@@ -218,19 +261,19 @@ const Heatmap = ({
             y={yAxisScale(matrixIndices[index][0])}
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
             height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
-            fill={interpolateRdYlBu(scaledData[index])}
+            fill={interpolateRdYlBu(values[index])}
             strokeWidth={1}
             stroke="white"
-            data-row-label={rowLabels[matrixIndices[index][0]]}
-            data-col-label={colLabels[matrixIndices[index][1]]}
-            data-cell-value={value}
+            data-row-label={orderedRowLabels[matrixIndices[index][0]]}
+            data-col-label={orderedColLabels[matrixIndices[index][1]]}
+            data-cell-value={data[valueOrder[index]]}
             rx={1}
             ry={1}
           ></rect>
         ))}
       </g>
       <g id="row-labels">
-        {rowLabels.map((value, index) => (
+        {rowOrder.map((value, index) => (
           <text
             key={index}
             transform={`translate(${svgWidth - marginRight - rowTextLength}, ${
@@ -243,12 +286,12 @@ const Heatmap = ({
             fontWeight="normal"
             fill="lightgrey"
           >
-            {value}
+            {rowLabels[value]}
           </text>
         ))}
       </g>
       <g id="col-labels">
-        {colLabels.map((value, index) => (
+        {colOrder.map((value, index) => (
           <text
             key={index}
             transform={`translate(${
@@ -263,7 +306,7 @@ const Heatmap = ({
             fontWeight="normal"
             fill="lightgrey"
           >
-            {value}
+            {colLabels[value]}
           </text>
         ))}
       </g>

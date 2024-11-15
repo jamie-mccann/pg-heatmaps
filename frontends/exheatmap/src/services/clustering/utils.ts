@@ -36,7 +36,6 @@ export const reshapeData = (
     );
   }
 
-  // ... fill in the function ...
   return rowOrder.flatMap((rowIndex) =>
     colOrder.map((colIndex) => data[rowIndex * ncols + colIndex])
   );
