@@ -3,6 +3,7 @@ import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import Typography from "@mui/material/Typography";
 
 import { range } from "d3";
+import { gray } from "d3-color";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { interpolateRdYlBu } from "d3-scale-chromatic";
@@ -15,8 +16,6 @@ import { hierarchicalClustering } from "../services/clustering/cluster";
 import {
   getVectors,
   getReorderedIndex,
-  reshapeData,
-  reshapedDataMap,
 } from "../services/clustering/utils";
 
 const Heatmap = ({
@@ -41,7 +40,6 @@ const Heatmap = ({
   const [values, setValues] = useState<number[]>([]);
   const [rowOrder, setRowOrder] = useState<number[]>([]);
   const [colOrder, setColOrder] = useState<number[]>([]);
-  const [valueOrder, setValueOrder] = useState<number[]>([]);
 
   useLayoutEffect(() => {
     const hiddenSvg = document.createElementNS(
@@ -135,7 +133,6 @@ const Heatmap = ({
     setRowOrder(newRowOrder);
     setColOrder(newColOrder);
     setValues(scaledData);
-    setValueOrder(reshapedDataMap(newRowOrder, newColOrder));
   }, [
     svgRef,
     dataScaler,
@@ -178,7 +175,7 @@ const Heatmap = ({
       .on("mouseleave", function () {
         select(this).transition().duration(300).attr("font-weight", "normal");
       });
-  }, [svgRef, rowOrder, colOrder, valueOrder]);
+  }, [svgRef, rowOrder, colOrder]);
 
   const heatmapBounds = {
     top: marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
@@ -250,15 +247,17 @@ const Heatmap = ({
             y={yAxisScale(matrixIndices[index][0])}
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
             height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
-            // fill={interpolateRdYlBu(values[valueOrder[index]])}
-            fill={interpolateRdYlBu(
-              values[getReorderedIndex(rowOrder, colOrder, index)]
-            )}
+            fill={
+              Number.isNaN(values[getReorderedIndex(rowOrder, colOrder, index)])
+                ? gray(50).toString()
+                : interpolateRdYlBu(
+                    values[getReorderedIndex(rowOrder, colOrder, index)]
+                  )
+            }
             strokeWidth={1}
             stroke="white"
             data-row-label={orderedRowLabels[matrixIndices[index][0]]}
             data-col-label={orderedColLabels[matrixIndices[index][1]]}
-            // data-cell-value={data[valueOrder[index]]}
             data-cell-value={data[getReorderedIndex(rowOrder, colOrder, index)]}
             rx={1}
             ry={1}
