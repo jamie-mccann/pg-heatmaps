@@ -62,7 +62,6 @@ const Heatmap = () => {
 
     const requestBody: ExpressionRequest = {
       species: species!, // species has to be set here, no?
-      clustering: "none",
       experimentId: ExperimentTitleToId[`${species} ${experiment}`],
       geneIds: geneAnnotations.map(
         (value) => `${value.chromosomeId}_${value.geneId}`
