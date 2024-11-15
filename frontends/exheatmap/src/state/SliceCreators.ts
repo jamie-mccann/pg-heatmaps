@@ -1,5 +1,11 @@
 import { StateCreator } from "zustand";
-import { GenesSlice, HeatmapSlice, SvgCanvasSlice } from "./SliceTypes";
+import {
+  ClusteringSlice,
+  ExpressionSlice,
+  GenesSlice,
+  HeatmapSlice,
+  SvgCanvasSlice,
+} from "./SliceTypes";
 
 export const createHeatmapSlice: StateCreator<
   HeatmapSlice,
@@ -10,13 +16,9 @@ export const createHeatmapSlice: StateCreator<
   species: null,
   experiment: null,
   scaler: "log",
-  metric: "euclidean",
-  linkage: "ward",
   setSpecies: (newSpecies) => set({ species: newSpecies }),
   setExperiment: (newExperiment) => set({ experiment: newExperiment }),
   setScaler: (newScaler: string) => set({ scaler: newScaler }),
-  setMetric: (newMetric) => set({ metric: newMetric }),
-  setLinkage: (newLinkage) => set({ linkage: newLinkage }),
 });
 
 export const createGenesSlice: StateCreator<GenesSlice, [], [], GenesSlice> = (
@@ -43,4 +45,32 @@ export const createSvgCanvasSlice: StateCreator<SvgCanvasSlice> = (set) => ({
   setDimensions: (w, h) => set({ svgHeight: h, svgWidth: w }),
   setSvgHeight: (h) => set({ svgHeight: h }),
   setSvgWidth: (w) => set({ svgWidth: w }),
+});
+
+export const createExpressionSlice: StateCreator<ExpressionSlice> = (set) => ({
+  expressionGenes: [],
+  expressionSamples: [],
+  expressionValues: [],
+  setExpressionData: (response) =>
+    set({
+      expressionGenes: response.genes,
+      expressionSamples: response.samples,
+      expressionValues: response.values,
+    }),
+});
+
+export const createClusteringSlice: StateCreator<
+  ClusteringSlice,
+  [],
+  [],
+  ClusteringSlice
+> = (set) => ({
+  metric: "euclidean",
+  linkage: "average",
+  axis: "row",
+  clusteringRowOrder: [],
+  clusteringColOrder: [],
+  setMetric: (newMetric: string) => set({ metric: newMetric }),
+  setLinkage: (newLinkage: string) => set({ linkage: newLinkage }),
+  setAxis: (newAxis: string) => set({ axis: newAxis }),
 });

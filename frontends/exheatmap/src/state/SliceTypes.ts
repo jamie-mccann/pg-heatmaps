@@ -1,16 +1,17 @@
-import { GeneAnnotation } from "../Models";
+import {
+  ExpressionResponse,
+  GeneAnnotation,
+  GeneInfo,
+  SampleInfo,
+} from "../Models";
 
 export interface HeatmapSlice {
   species: string | null;
   experiment: string | null;
   scaler: string;
-  metric: string;
-  linkage: string;
   setSpecies: (newSpecies: string | null) => void;
   setExperiment: (newExperiment: string | null) => void;
   setScaler: (newScaler: string) => void;
-  setMetric: (newMetric: string) => void;
-  setLinkage: (newLinkage: string) => void;
 }
 
 export interface GenesSlice {
@@ -30,4 +31,22 @@ export interface SvgCanvasSlice {
   setDimensions: (w: number, h: number) => void;
   setSvgWidth: (w: number) => void;
   setSvgHeight: (h: number) => void;
+}
+
+export interface ExpressionSlice {
+  expressionGenes: GeneInfo[];
+  expressionSamples: SampleInfo[];
+  expressionValues: number[];
+  setExpressionData: (response: ExpressionResponse) => void;
+}
+
+export interface ClusteringSlice {
+  metric: string;
+  linkage: string;
+  axis: string;
+  clusteringRowOrder: number[];
+  clusteringColOrder: number[];
+  setMetric: (newMetric: string) => void;
+  setLinkage: (newLinkage: string) => void;
+  setAxis: (newAxis: string) => void;
 }
