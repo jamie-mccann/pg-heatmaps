@@ -42,15 +42,23 @@ export const reshapeData = (
 };
 
 export const reshapedDataMap = (rowOrder: number[], colOrder: number[]) => {
-  const nrows = rowOrder.length;
   const ncols = colOrder.length;
-  const indices = Array.from({ length: nrows * ncols }, (_, index) => index);
 
   return rowOrder.flatMap((rowIndex) =>
-    colOrder.map((colIndex) => indices[rowIndex * ncols + colIndex])
+    colOrder.map((colIndex) => rowIndex * ncols + colIndex)
   );
 };
 
+export const getReorderedIndex = (
+  rowOrder: number[],
+  colOrder: number[],
+  index: number
+): number =>
+  // index = rowIndex * colOrder.length + colIndex where
+  // rowIndex = Math.floor(index / colOrder.length) and
+  // colIndex = rem(index, colOrder.length)
+  rowOrder[Math.floor(index / colOrder.length)] * colOrder.length +
+  colOrder[index % colOrder.length];
 
 export const findNodesToMerge = (
   nodes: Node[],

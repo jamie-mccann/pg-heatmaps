@@ -14,6 +14,7 @@ import { DataScalers } from "../utils/Scalers";
 import { hierarchicalClustering } from "../services/clustering/cluster";
 import {
   getVectors,
+  getReorderedIndex,
   reshapeData,
   reshapedDataMap,
 } from "../services/clustering/utils";
@@ -120,11 +121,7 @@ const Heatmap = ({
       clusteringAxis === "col" || clusteringAxis === "both"
         ? hierarchicalClustering({
             data: getVectors(
-              DataScalers[dataScaler].function({
-                data: data,
-                nrows: rowLabels.length,
-                ncols: colLabels.length,
-              }),
+              scaledData,
               rowLabels.length,
               colLabels.length,
               "col"
@@ -135,11 +132,9 @@ const Heatmap = ({
           })
         : Array.from({ length: colLabels.length }, (_, index) => index);
 
-
     setRowOrder(newRowOrder);
     setColOrder(newColOrder);
-    const dataReshaped = reshapeData(scaledData, newRowOrder, newColOrder);
-    setValues(dataReshaped);
+    setValues(scaledData);
     setValueOrder(reshapedDataMap(newRowOrder, newColOrder));
   }, [
     svgRef,
@@ -220,12 +215,6 @@ const Heatmap = ({
 
   const orderedColLabels = colOrder.map((value) => colLabels[value]);
 
-  // const scaledData = DataScalers[dataScaler].function({
-  //   data,
-  //   ncols: colLabels.length,
-  //   nrows: rowLabels.length,
-  // });
-
   if (svgWidth === 0 || rowTextLength === 0) {
     return <Typography variant="h3">Rendering heatmap ...</Typography>;
   }
@@ -261,12 +250,16 @@ const Heatmap = ({
             y={yAxisScale(matrixIndices[index][0])}
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
             height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
-            fill={interpolateRdYlBu(values[index])}
+            // fill={interpolateRdYlBu(values[valueOrder[index]])}
+            fill={interpolateRdYlBu(
+              values[getReorderedIndex(rowOrder, colOrder, index)]
+            )}
             strokeWidth={1}
             stroke="white"
             data-row-label={orderedRowLabels[matrixIndices[index][0]]}
             data-col-label={orderedColLabels[matrixIndices[index][1]]}
-            data-cell-value={data[valueOrder[index]]}
+            // data-cell-value={data[valueOrder[index]]}
+            data-cell-value={data[getReorderedIndex(rowOrder, colOrder, index)]}
             rx={1}
             ry={1}
           ></rect>

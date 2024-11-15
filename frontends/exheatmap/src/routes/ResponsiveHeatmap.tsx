@@ -101,7 +101,6 @@ const ResponsiveHeatmap = () => {
     fetchData();
   }, []);
 
-
   const heatMapSettings: HeatmapSettings = {
     marginConfig: {
       marginTop: 30,
@@ -155,7 +154,7 @@ const ResponsiveHeatmap = () => {
   return (
     <Paper>
       <Grid container flexDirection="column">
-      <Grid padding={2} spacing={1}>
+        <Grid padding={2} spacing={1}>
           <FormControl>
             <FormLabel id="scaling-radio-buttons-group-label">
               Scaling
@@ -216,7 +215,7 @@ const ResponsiveHeatmap = () => {
             <RadioGroup
               row={true}
               aria-labelledby="linkage-radio-buttons-group-label"
-              defaultValue="ward"
+              defaultValue="average"
               name="linkage-radio-buttons-group"
               value={clusteringLinkage}
               onChange={handleLinkageChange}
