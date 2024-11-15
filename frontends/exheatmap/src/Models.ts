@@ -6,7 +6,6 @@ export interface AnnotationsRequest {
 export interface ExpressionRequest {
   species: string;
   experimentId: number;
-  clustering: string | null;
   geneIds: string[];
 }
 

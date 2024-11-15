@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Literal, Optional, Tuple
+from typing import List, Optional, Tuple
 
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -77,7 +77,6 @@ class SampleInfo(PlantGenieModel):
 class ExpressionRequest(PlantGenieModel):
     species: str
     experiment_id: int = Field(alias="experimentId")
-    clustering: Literal["none", "genes", "species", "both"] = Field(default="genes")
     gene_ids: List[str] = Field(alias="geneIds", default=[])
 
 

@@ -55,7 +55,6 @@ const ResponsiveHeatmap = () => {
 
     const requestBody: ExpressionRequest = {
       species: species!, // species has to be set here, no?
-      clustering: "none",
       experimentId: ExperimentTitleToId[`${species} ${experiment}`],
       geneIds: geneAnnotations
         .filter((_, index) => selectedGenes[index])
