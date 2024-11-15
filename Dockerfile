@@ -4,13 +4,13 @@ FROM node:20.17.0-alpine AS frontend-builder
 WORKDIR /app
 
 # Copy only package files to leverage Docker cache
-COPY ./react-frontend/package.json ./
-COPY ./react-frontend/tsconfig.json ./
-COPY ./react-frontend/vite.config.ts ./
+COPY ./frontends/exheatmap/package.json ./
+COPY ./frontends/exheatmap/tsconfig.json ./
+COPY ./frontends/exheatmap/vite.config.ts ./
 
 # Install dependencies and build the frontend
 RUN yarn install --frozen-lockfile --force
-COPY ./react-frontend ./
+COPY ./frontends/exheatmap ./
 RUN yarn build
 
 # Stage 2: Set up the FastAPI backend with Poetry
@@ -36,6 +36,7 @@ RUN poetry install --only-root
 
 # remove unnecessary react frontend folder (built in frontend-builder)
 RUN rm -rf /app/plantgenie_heatmaps/react-frontend/{*,.*}
+RUN rm -rf /app/plantgenie_heatmaps/frontends/{*,.*}
 # Copy over React build
 COPY --from=frontend-builder /app/dist /app/react-frontend/dist
 
