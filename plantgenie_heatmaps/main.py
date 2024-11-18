@@ -5,7 +5,7 @@ import duckdb
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from plantgenie_heatmaps.models import (
@@ -46,10 +46,18 @@ async def root():
     return FileResponse(static_files_path / "index.html")
 
 
+# @app.get("/{full_path:path}", include_in_schema=False)
+# async def catch_all(full_path: str):
+#     return FileResponse(static_files_path / "index.html")
+
+# Catch-all route for React (redirect to root for non-API routes)
 @app.get("/{full_path:path}", include_in_schema=False)
 async def catch_all(full_path: str):
-    return FileResponse(static_files_path / "index.html")
-
+    # If the path starts with "api/", return 404
+    if full_path.startswith("api/"):
+        return {"detail": "Not Found"}, 404
+    # Redirect to root (React will handle routing from `/`)
+    return RedirectResponse(url="/")
 
 @app.get("/api")
 async def api_root():
