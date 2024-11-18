@@ -35,7 +35,7 @@ export const useMaxTextLength = ({
       textEl.setAttribute("visibility", "hidden");
       textEl.setAttribute("font-size", `${fontSize}`);
       textEl.setAttribute("font-family", fontFamily);
-      textEl.setAttribute("f'ont-weight", fontWeight);
+      textEl.setAttribute("font-weight", fontWeight);
       textEl.setAttribute("text-anchor", textAnchor);
       textEl.setAttribute("dominant-baseline", dominantBaseline);
       if (rotation !== 0) {
