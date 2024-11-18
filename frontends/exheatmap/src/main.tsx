@@ -62,7 +62,7 @@ const RootContainer = () => {
   return (
     <ThemeProvider theme={createTheme(themeOptions)}>
       <CssBaseline />
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }}/>
     </ThemeProvider>
   );
 };
