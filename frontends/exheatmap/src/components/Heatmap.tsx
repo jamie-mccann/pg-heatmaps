@@ -29,17 +29,20 @@ const Heatmap = ({
   const svgRef = useAppStore((state) => state.svgRef);
   const svgWidth = useAppStore((state) => state.svgWidth);
   const svgHeight = useAppStore((state) => state.svgHeight);
+  const setSvgHeight = useAppStore((state) => state.setSvgHeight);
 
   const rowTextLength = useMaxTextLength({
     texts: rowLabels,
     fontSize: labelFontSize,
     rotation: 0,
+    axis: "width",
   });
 
   const colTextLength = useMaxTextLength({
     texts: colLabels,
     fontSize: labelFontSize,
     rotation: -45,
+    axis: "height",
   });
 
   const { rowOrder, colOrder, values } = useClustering(
@@ -82,6 +85,15 @@ const Heatmap = ({
         select(this).transition().duration(300).attr("font-weight", "normal");
       });
   }, [svgRef, rowOrder, colOrder]);
+
+  useEffect(() => {
+    setSvgHeight(
+      rowLabels.length * (cellHeight + cellPadding) +
+        colTextLength +
+        marginTop +
+        marginBottom
+    );
+  }, [colTextLength, marginBottom, marginTop]);
 
   const heatmapBounds = {
     top: marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
@@ -135,7 +147,7 @@ const Heatmap = ({
     [colOrder]
   );
 
-  if (svgWidth === 0 || rowTextLength === 0) {
+  if (svgWidth === 0 || rowTextLength === 0 || svgHeight === 0) {
     return <Typography variant="h3">Rendering heatmap ...</Typography>;
   }
 
@@ -156,6 +168,7 @@ const Heatmap = ({
         stroke="white"
         rx={1}
         ry={1}
+        // add and subtract 1 to add a bit of extra whitespace around the heatmap
         x={heatmapBounds.left - 1}
         y={heatmapBounds.top - 1}
         width={heatmapBounds.right - heatmapBounds.left + 1}
@@ -169,7 +182,8 @@ const Heatmap = ({
             x={xAxisScale(originalColMap(index))}
             y={yAxisScale(originalRowMap(index))}
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
-            height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
+            // height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
+            height={cellHeight}
             fill={
               Number.isNaN(values[reorderedIndexMap(index)])
                 ? gray(50).toString()

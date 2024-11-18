@@ -24,6 +24,7 @@ import SvgCanvas from "../components/SvgCanvas";
 import Heatmap from "../components/Heatmap";
 
 const ResponsiveHeatmap = () => {
+  const svgHeight = useAppStore((state) => state.svgHeight);
   const species = useAppStore((state) => state.species);
   const experiment = useAppStore((state) => state.experiment);
   const geneAnnotations = useAppStore((state) => state.geneAnnotations);
@@ -115,7 +116,7 @@ const ResponsiveHeatmap = () => {
     },
     cellConfig: {
       cellPadding: 1,
-      cellHeight: 30,
+      cellHeight: 20,
     },
     data: expressionValues,
     rowLabels: expressionGenes.map(
@@ -255,7 +256,8 @@ const ResponsiveHeatmap = () => {
           id="svg-container-3"
           className="svg-container"
           size={{ xs: 12 }}
-          height="2500px"
+          height={`${svgHeight}px`}
+          // height="2500px"
           width="100%"
         >
           <SvgCanvas>

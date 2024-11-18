@@ -8,6 +8,7 @@ interface MaxTextLengthProps {
   fontWeight?: string;
   textAnchor?: string;
   dominantBaseline?: string;
+  axis?: string;
 }
 
 export const useMaxTextLength = ({
@@ -18,6 +19,7 @@ export const useMaxTextLength = ({
   fontWeight = "normal",
   dominantBaseline = "alphabetic",
   textAnchor = "start",
+  axis = "width",
 }: MaxTextLengthProps) => {
   const [maxTextLength, setMaxTextLength] = useState<number>(0);
 
@@ -41,7 +43,13 @@ export const useMaxTextLength = ({
       }
       textEl.textContent = value;
       svg.appendChild(textEl);
-      const length = textEl.getComputedTextLength();
+      const textElRect = textEl.getBoundingClientRect();
+      const length =
+        axis == "height"
+          ? textElRect.height
+          : axis === "width"
+          ? textElRect.width
+          : textElRect.width;
       svg.removeChild(textEl);
       return length;
     });
