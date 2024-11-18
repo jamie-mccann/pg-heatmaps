@@ -4,7 +4,7 @@ import { ActionFunction, Form, Outlet, redirect } from "react-router-dom";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid2";
 import Paper from "@mui/material/Paper";
-import ForestIcon from '@mui/icons-material/Forest';
+import ForestIcon from "@mui/icons-material/Forest";
 
 import { useAppStore } from "../state/AppStore";
 import {
@@ -44,8 +44,9 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
     geneIds: geneIds,
   };
 
-  // const url = "http://192.168.0.109:8080/api/annotations";
-  const url = "http://localhost:8080/api/annotations";
+  const url = import.meta.env.PROD
+    ? "http://goodall.upsc.se/api/expression"
+    : "http://localhost:8080/api/expression";
 
   const response = await fetch(url, {
     method: "POST",
@@ -86,7 +87,7 @@ const Root = () => {
           }}
         >
           <Grid container spacing={2} alignItems="center">
-            <ForestIcon fontSize="large" color="primary"/>
+            <ForestIcon fontSize="large" color="primary" />
             <Typography variant="h4">PlantGenie</Typography>
           </Grid>
         </Paper>
