@@ -45,6 +45,12 @@ export const useClustering = (data: number[], nrows: number, ncols: number) => {
     setRowOrder(newRowOrder);
     setColOrder(newColOrder);
     setValues(scaledData);
+
+    return () => {
+      setRowOrder([]);
+      setColOrder([]);
+      setValues([]);
+    };
   }, [dataScaler, clusteringAxis, clusteringMetric, clusteringLinkage, data]);
 
   return { rowOrder, colOrder, values };

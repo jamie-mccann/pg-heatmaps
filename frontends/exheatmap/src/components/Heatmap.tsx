@@ -1,8 +1,7 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 
 import Typography from "@mui/material/Typography";
 
-import { range } from "d3";
 import { gray } from "d3-color";
 import { select } from "d3-selection";
 import { scaleLinear } from "d3-scale";
@@ -107,11 +106,17 @@ const Heatmap = ({
     [svgHeight, colTextLength]
   );
 
-  const matrixIndices = useMemo(
+  const originalRowMap = useMemo(
     () =>
-      range(rowLabels.length).flatMap((row) =>
-        range(colLabels.length).map((col) => [row, col])
+      createReorderedRowMapper(
+        rowLabels.map((_, index) => index),
+        colLabels.length
       ),
+    [rowLabels, colLabels]
+  );
+
+  const originalColMap = useMemo(
+    () => createReorderedColMapper(colLabels.map((_, index) => index)),
     [rowLabels, colLabels]
   );
 
@@ -129,9 +134,6 @@ const Heatmap = ({
     () => createReorderedColMapper(colOrder),
     [colOrder]
   );
-  const orderedRowLabels = rowOrder.map((value) => rowLabels[value]);
-
-  const orderedColLabels = colOrder.map((value) => colLabels[value]);
 
   if (svgWidth === 0 || rowTextLength === 0) {
     return <Typography variant="h3">Rendering heatmap ...</Typography>;
@@ -164,8 +166,8 @@ const Heatmap = ({
           <rect
             className="tooltip-trigger"
             key={index}
-            x={xAxisScale(matrixIndices[index][1])}
-            y={yAxisScale(matrixIndices[index][0])}
+            x={xAxisScale(originalColMap(index))}
+            y={yAxisScale(originalRowMap(index))}
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
             height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
             fill={
@@ -175,8 +177,8 @@ const Heatmap = ({
             }
             strokeWidth={1}
             stroke="white"
-            data-row-label={orderedRowLabels[reorderedRowMap(index)]}
-            data-col-label={orderedColLabels[reorderedColMap(index)]}
+            data-row-label={rowLabels[reorderedRowMap(index)]}
+            data-col-label={colLabels[reorderedColMap(index)]}
             data-cell-value={data[reorderedIndexMap(index)]}
             rx={1}
             ry={1}
