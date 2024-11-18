@@ -88,12 +88,13 @@ const Heatmap = ({
 
   useEffect(() => {
     setSvgHeight(
-      rowLabels.length * (cellHeight + cellPadding) +
-        colTextLength +
+      rowOrder.length * (cellHeight + cellPadding) +
+        labelPadding +
+        colTextLength * Math.sin(Math.PI / 4) +
         marginTop +
         marginBottom
     );
-  }, [colTextLength, marginBottom, marginTop]);
+  }, [rowOrder, colTextLength, marginBottom, marginTop]);
 
   const heatmapBounds = {
     top: marginTop + colTextLength * Math.sin(Math.PI / 4) + labelPadding,
