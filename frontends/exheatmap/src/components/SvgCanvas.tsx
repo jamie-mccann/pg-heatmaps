@@ -9,23 +9,20 @@ interface SvgCanvasProps {
 const SvgCanvas = ({ children }: SvgCanvasProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const setSvgRef = useAppStore((state) => state.setSvgRef);
-  const setDimensions = useAppStore((state) => state.setDimensions);
-
-  const svgWidth = useAppStore((state) => state.svgWidth);
-  const svgHeight = useAppStore((state) => state.svgHeight);
+  // const setDimensions = useAppStore((state) => state.setDimensions);
+  const setSvgWidth = useAppStore((state) => state.setSvgWidth);
 
   useEffect(() => {
     setSvgRef(svgRef);
 
     const updateDimensions = () => {
       if (svgRef.current) {
-        const { width, height } = svgRef.current.getBoundingClientRect();
-        if (svgWidth !== width || svgHeight !== height) {
-          setDimensions(width, height);
-          console.log(`width: ${width} height: ${height}`);
-        }
+        const { width } = svgRef.current.getBoundingClientRect();
+        requestAnimationFrame(() => {
+          // setDimensions(width, height);
+          setSvgWidth(width);
+        });
       }
-      console.log(`${svgWidth} ${svgHeight}`)
     };
 
     const resizeObserver = new ResizeObserver(() => {
@@ -44,7 +41,7 @@ const SvgCanvas = ({ children }: SvgCanvasProps) => {
         resizeObserver.unobserve(svgRef.current);
       }
     };
-  }, [svgWidth, svgHeight]);
+  }, []);
 
   return (
     <svg ref={svgRef} style={{ height: "100%", width: "100%" }}>

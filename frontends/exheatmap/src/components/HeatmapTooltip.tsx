@@ -19,8 +19,6 @@ const HeatmapTooltip = ({
 }: HeatmapTooltipSettings) => {
   // globally managed state
   const svgRef = useAppStore((state) => state.svgRef);
-  const svgHeight = useAppStore((state) => state.svgHeight);
-  const svgWidth = useAppStore((state) => state.svgWidth);
   // component locally managed state
   const [visibility, setVisibility] = useState<"hidden" | "visible">("hidden");
   const [transform, setTransform] = useState<string | undefined>(undefined);
@@ -37,6 +35,7 @@ const HeatmapTooltip = ({
 
     const svg = svgRef.current;
     const svgCtm = svg.getScreenCTM();
+    const svgRect = svg.getBoundingClientRect();
 
     const showTooltip = (event: MouseEvent) => {
       event.preventDefault();
@@ -109,11 +108,11 @@ const HeatmapTooltip = ({
       let y = (event.pageY - CTM.f + 20) / CTM.d;
 
       // Check if tooltip would overflow the SVG width and adjust x position
-      if (x + calculatedTooltipWidth + paddingLeft + paddingRight > svgWidth) {
+      if (x + calculatedTooltipWidth + paddingLeft + paddingRight > svgRect.width) {
         x -= calculatedTooltipWidth + 12; // Shift left if near right edge
       }
       // Check if tooltip would overflow the SVG height and adjust y position
-      if (y + tooltipHeight > svgHeight) {
+      if (y + tooltipHeight > svgRect.height) {
         y -= tooltipHeight + 24; // Shift up if near bottom edge
       }
 
