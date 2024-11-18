@@ -42,4 +42,4 @@ COPY --from=frontend-builder /app/dist /app/react-frontend/dist
 
 EXPOSE 80
 
-CMD ["poetry", "run", "uvicorn", "plantgenie_heatmaps.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["poetry", "run", "uvicorn", "plantgenie_heatmaps.main:app", "--host", "0.0.0.0", "--port", "8080"]
