@@ -45,8 +45,8 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
   };
 
   const url = import.meta.env.PROD
-    ? "http://goodall.upsc.se/api/expression"
-    : "http://localhost:8080/api/expression";
+    ? "http://goodall.upsc.se/api/annotations"
+    : "http://localhost:8080/api/annotations";
 
   const response = await fetch(url, {
     method: "POST",
