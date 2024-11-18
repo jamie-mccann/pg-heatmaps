@@ -19,30 +19,41 @@ import ResponsiveHeatmap from "./routes/ResponsiveHeatmap";
 
 import Heatmap from "./routes/Heatmap";
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: "/",
+      element: <Root />,
+      action: geneIdsAction,
+      children: [
+        { index: true, element: <Index /> },
+        {
+          path: "gene-list",
+          element: <GeneTableDisplay />,
+          loader: geneTableLoader,
+        },
+        {
+          path: "heatmap",
+          element: <Heatmap />,
+        },
+        {
+          path: "responsive-heatmap",
+          element: <ResponsiveHeatmap />,
+        },
+        { path: "network", element: <div>Network</div> },
+      ],
+    },
+  ],
   {
-    path: "/",
-    element: <Root />,
-    action: geneIdsAction,
-    children: [
-      { index: true, element: <Index /> },
-      {
-        path: "gene-list",
-        element: <GeneTableDisplay />,
-        loader: geneTableLoader,
-      },
-      {
-        path: "heatmap",
-        element: <Heatmap />,
-      },
-      {
-        path: "responsive-heatmap",
-        element: <ResponsiveHeatmap />
-      },
-      { path: "network", element: <div>Network</div> },
-    ],
-  },
-]);
+    future: {
+      v7_relativeSplatPath: true,
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true,
+    },
+  }
+);
 
 const RootContainer = () => {
   const themeOptions: ThemeOptions = {
@@ -50,11 +61,11 @@ const RootContainer = () => {
       mode: "dark",
       primary: {
         // main: "#312f38",
-        main: "#9EBF6D"
+        main: "#9EBF6D",
       },
       secondary: {
         // main: "#17990e",
-        main: "#8E6DBF"
+        main: "#8E6DBF",
       },
     },
   };
@@ -62,7 +73,7 @@ const RootContainer = () => {
   return (
     <ThemeProvider theme={createTheme(themeOptions)}>
       <CssBaseline />
-      <RouterProvider router={router} future={{ v7_startTransition: true }}/>
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </ThemeProvider>
   );
 };
