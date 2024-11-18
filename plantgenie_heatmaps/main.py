@@ -46,6 +46,11 @@ async def root():
     return FileResponse(static_files_path / "index.html")
 
 
+@app.get("/{full_path:path}", include_in_schema=False)
+async def catch_all(full_path: str):
+    return FileResponse(static_files_path / "index.html")
+
+
 @app.get("/api")
 async def api_root():
     message = {
@@ -145,7 +150,9 @@ async def get_expression_duckdb(request: ExpressionRequest) -> ExpressionRespons
             .fetchall()
         ]
 
-        sample_info_order = {sample.sample_id: i for i, sample in enumerate(samples_ordered)}
+        sample_info_order = {
+            sample.sample_id: i for i, sample in enumerate(samples_ordered)
+        }
 
         query = (
             f"SELECT sample_id, chromosome_id, gene_id, tpm from {experiment} "
