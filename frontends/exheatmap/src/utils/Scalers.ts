@@ -70,7 +70,7 @@ const logScaler = ({ data }: ScalerArgs): number[] => {
 };
 
 const noneScaler = ({ data }: ScalerArgs): number[] => {
-  const unitIntervalMap = scaleLinear([0, Math.max(...data)], [0, 1]);
+  const unitIntervalMap = scaleLinear([Math.min(...data), Math.max(...data)], [0, 1]);
   return data.map((value) => 1 - unitIntervalMap(value));
 };
 

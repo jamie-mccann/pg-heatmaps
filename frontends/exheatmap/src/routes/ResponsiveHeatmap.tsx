@@ -36,13 +36,15 @@ const ResponsiveHeatmap = () => {
   const setClusteringMetric = useAppStore((state) => state.setMetric);
   const setClusteringLinkage = useAppStore((state) => state.setLinkage);
   const setClusteringAxis = useAppStore((state) => state.setAxis);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   const expressionValues = useAppStore((state) => state.expressionValues);
   const expressionGenes = useAppStore((state) => state.expressionGenes);
   const expressionSamples = useAppStore((state) => state.expressionSamples);
   const setExpressionData = useAppStore((state) => state.setExpressionData);
+
+  // local ui state
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [loadingError, setLoadingError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 

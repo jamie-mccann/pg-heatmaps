@@ -60,6 +60,22 @@ export const getReorderedIndex = (
   rowOrder[Math.floor(index / colOrder.length)] * colOrder.length +
   colOrder[index % colOrder.length];
 
+export const createReorderedIndexMapper =
+  (rowOrder: number[], colOrder: number[]): ((index: number) => number) =>
+  (index: number) =>
+    rowOrder[Math.floor(index / colOrder.length)] * colOrder.length +
+    colOrder[index % colOrder.length];
+
+export const createReorderedRowMapper =
+  (rowOrder: number[], numCols: number): ((index: number) => number) =>
+  (index: number) =>
+    rowOrder[Math.floor(index / numCols)];
+
+export const createReorderedColMapper =
+  (colOrder: number[]): ((index: number) => number) =>
+  (index: number) =>
+    colOrder[index % colOrder.length];
+
 export const findNodesToMerge = (
   nodes: Node[],
   dataMatrix: number[][],

@@ -11,12 +11,13 @@ import { interpolateRdYlBu } from "d3-scale-chromatic";
 import { useAppStore } from "../state/AppStore";
 import { HeatmapSettings } from "../Models";
 import HeatmapTooltip from "./HeatmapTooltip";
-import { DataScalers } from "../utils/Scalers";
-import { hierarchicalClustering } from "../services/clustering/cluster";
 import {
-  getVectors,
-  getReorderedIndex,
+  createReorderedColMapper,
+  createReorderedIndexMapper,
+  createReorderedRowMapper,
 } from "../services/clustering/utils";
+import { useClustering } from "../hooks/useClustering";
+import { useMaxTextLength } from "../hooks/useMaxTextLength";
 
 const Heatmap = ({
   marginConfig: { marginTop, marginBottom, marginLeft, marginRight },
@@ -26,121 +27,27 @@ const Heatmap = ({
   rowLabels,
   colLabels,
 }: HeatmapSettings) => {
-  const dataScaler = useAppStore((state) => state.scaler);
-  const clusteringAxis = useAppStore((state) => state.axis);
-  const clusteringMetric = useAppStore((state) => state.metric);
-  const clusteringLinkage = useAppStore((state) => state.linkage);
   const svgRef = useAppStore((state) => state.svgRef);
   const svgWidth = useAppStore((state) => state.svgWidth);
   const svgHeight = useAppStore((state) => state.svgHeight);
-  // local state
-  const [rowTextLength, setRowTextLength] = useState<number>(0);
-  const [colTextLength, setColTextLength] = useState<number>(0);
-  // local data state
-  const [values, setValues] = useState<number[]>([]);
-  const [rowOrder, setRowOrder] = useState<number[]>([]);
-  const [colOrder, setColOrder] = useState<number[]>([]);
 
-  useLayoutEffect(() => {
-    const hiddenSvg = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "svg"
-    );
-    hiddenSvg.setAttribute("visibility", "hidden");
-    document.body.appendChild(hiddenSvg);
+  const rowTextLength = useMaxTextLength({
+    texts: rowLabels,
+    fontSize: labelFontSize,
+    rotation: 0,
+  });
 
-    const xTextLengths = rowLabels.map((value) => {
-      const textEl = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "text"
-      );
-      textEl.setAttribute("visibility", "hidden");
-      textEl.setAttribute("font-size", `${labelFontSize}`);
-      textEl.textContent = value;
-      hiddenSvg.appendChild(textEl);
-      const length = textEl.getComputedTextLength();
-      hiddenSvg.removeChild(textEl);
-      return length;
-    });
+  const colTextLength = useMaxTextLength({
+    texts: colLabels,
+    fontSize: labelFontSize,
+    rotation: -45,
+  });
 
-    setRowTextLength(Math.max(...xTextLengths));
-
-    const yTextLengths = colLabels.map((value) => {
-      const textEl = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "text"
-      );
-      textEl.setAttribute("visibility", "hidden");
-      textEl.setAttribute("font-size", `${labelFontSize}`);
-      textEl.textContent = value;
-      hiddenSvg.appendChild(textEl);
-      const length = textEl.getComputedTextLength();
-      hiddenSvg.removeChild(textEl);
-      return length;
-    });
-
-    setColTextLength(Math.max(...yTextLengths));
-
-    const newSvgHeight =
-      marginBottom +
-      marginTop +
-      Math.max(...yTextLengths) * Math.sin(Math.PI / 4) +
-      labelPadding +
-      cellHeight * rowLabels.length;
-    cellPadding * (rowLabels.length + 1);
-    console.log(`New SVG Height: ${newSvgHeight}`);
-
-    document.body.removeChild(hiddenSvg);
-  }, []);
-
-  // clustering effect
-  useEffect(() => {
-    const scaledData = DataScalers[dataScaler].function({
-      data: data,
-      nrows: rowLabels.length,
-      ncols: colLabels.length,
-    });
-    const newRowOrder =
-      clusteringAxis === "row" || clusteringAxis === "both"
-        ? hierarchicalClustering({
-            data: getVectors(
-              scaledData,
-              rowLabels.length,
-              colLabels.length,
-              "row"
-            ),
-            distanceMetric: clusteringMetric,
-            linkageMetric: clusteringLinkage,
-            by: "row",
-          })
-        : Array.from({ length: rowLabels.length }, (_, index) => index);
-
-    const newColOrder =
-      clusteringAxis === "col" || clusteringAxis === "both"
-        ? hierarchicalClustering({
-            data: getVectors(
-              scaledData,
-              rowLabels.length,
-              colLabels.length,
-              "col"
-            ),
-            distanceMetric: clusteringMetric,
-            linkageMetric: clusteringLinkage,
-            by: "col",
-          })
-        : Array.from({ length: colLabels.length }, (_, index) => index);
-
-    setRowOrder(newRowOrder);
-    setColOrder(newColOrder);
-    setValues(scaledData);
-  }, [
-    svgRef,
-    dataScaler,
-    clusteringAxis,
-    clusteringMetric,
-    clusteringLinkage,
+  const { rowOrder, colOrder, values } = useClustering(
     data,
-  ]);
+    rowLabels.length,
+    colLabels.length
+  );
 
   // d3 animations effect
   useEffect(() => {
@@ -208,6 +115,20 @@ const Heatmap = ({
     [rowLabels, colLabels]
   );
 
+  const reorderedIndexMap = useMemo(
+    () => createReorderedIndexMapper(rowOrder, colOrder),
+    [rowOrder, colOrder]
+  );
+
+  const reorderedRowMap = useMemo(
+    () => createReorderedRowMapper(rowOrder, colOrder.length),
+    [rowOrder, colOrder]
+  );
+
+  const reorderedColMap = useMemo(
+    () => createReorderedColMapper(colOrder),
+    [colOrder]
+  );
   const orderedRowLabels = rowOrder.map((value) => rowLabels[value]);
 
   const orderedColLabels = colOrder.map((value) => colLabels[value]);
@@ -248,17 +169,15 @@ const Heatmap = ({
             width={Math.abs(xAxisScale(0) - xAxisScale(1)) - cellPadding}
             height={Math.abs(yAxisScale(0) - yAxisScale(1)) - cellPadding}
             fill={
-              Number.isNaN(values[getReorderedIndex(rowOrder, colOrder, index)])
+              Number.isNaN(values[reorderedIndexMap(index)])
                 ? gray(50).toString()
-                : interpolateRdYlBu(
-                    values[getReorderedIndex(rowOrder, colOrder, index)]
-                  )
+                : interpolateRdYlBu(values[reorderedIndexMap(index)])
             }
             strokeWidth={1}
             stroke="white"
-            data-row-label={orderedRowLabels[matrixIndices[index][0]]}
-            data-col-label={orderedColLabels[matrixIndices[index][1]]}
-            data-cell-value={data[getReorderedIndex(rowOrder, colOrder, index)]}
+            data-row-label={orderedRowLabels[reorderedRowMap(index)]}
+            data-col-label={orderedColLabels[reorderedColMap(index)]}
+            data-cell-value={data[reorderedIndexMap(index)]}
             rx={1}
             ry={1}
           ></rect>
