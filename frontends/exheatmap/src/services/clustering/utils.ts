@@ -142,3 +142,28 @@ export const preorderLeafTraversal = (node: Node): number[] =>
         (acc, child) => acc.concat(preorderLeafTraversal(child)),
         []
       );
+
+export const getSubtreeSize = (node: Node): number => {
+  // Base case: if the node has no children, it's a leaf, so size is 1
+  if (node.children.length === 0) {
+    return 1;
+  }
+
+  // Recursively sum the sizes of the children
+  let size = 0;
+  for (const child of node.children) {
+    size += getSubtreeSize(child);
+  }
+  return size;
+}
+
+// Function to ladderize the tree
+export const ladderizeTree = (node: Node): void => {
+  // First, sort the children of the current node based on the size of their subtrees (in descending order)
+  node.children.sort((a, b) => getSubtreeSize(b) - getSubtreeSize(a));
+
+  // Recursively ladderize the children
+  for (const child of node.children) {
+    ladderizeTree(child);
+  }
+}

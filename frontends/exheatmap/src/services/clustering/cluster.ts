@@ -8,7 +8,7 @@ import {
 import {
   LinkageMetrics,
 } from "./linkages";
-import { findNodesToMerge, preorderLeafTraversal } from "./utils";
+import { findNodesToMerge, ladderizeTree, preorderLeafTraversal } from "./utils";
 
 export const hierarchicalClustering = ({
   data = [],
@@ -36,6 +36,8 @@ export const hierarchicalClustering = ({
   const root = nodes.reduce((remainingNodes) => {
     return findNodesToMerge(remainingNodes, data, distances, linkage);
   }, nodes)[0];
+
+  ladderizeTree(root);
 
   return preorderLeafTraversal(root);
 };
