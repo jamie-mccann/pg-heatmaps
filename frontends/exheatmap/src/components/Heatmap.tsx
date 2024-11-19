@@ -169,7 +169,7 @@ const Heatmap = ({
         stroke="white"
         rx={1}
         ry={1}
-        // add and subtract 1 to add a bit of extra whitespace around the heatmap
+        // +- 1 for extra whitespace around the heatmap
         x={heatmapBounds.left - 1}
         y={heatmapBounds.top - 1}
         width={heatmapBounds.right - heatmapBounds.left + 1}

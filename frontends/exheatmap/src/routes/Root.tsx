@@ -61,7 +61,7 @@ export const geneIdsAction: ActionFunction = async ({ request }) => {
     throw new Error(`Error fetching data from ${url}`);
   }
 
-  const geneAnnotations = (await response.json()) as AnnotationsResponse;
+  const geneAnnotations: AnnotationsResponse = await response.json();
 
   setGeneAnnotations(geneAnnotations.results as GeneAnnotation[]);
 
