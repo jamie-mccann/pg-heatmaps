@@ -88,7 +88,7 @@ async def get_genomic_sequence(
 
     # ruff: noqa: F841 reason: queried by duckdb <--> parquet
     dataset = pyarrow.dataset.dataset(
-        PARQUET_GENOMES_PATH / f"{request.species}-{request.ve}",
+        PARQUET_GENOMES_PATH / f"{request.species}-{request.version}",
         partitioning=FASTA_GENOME_PARTITIONING,
         schema=FASTA_GENOME_SCHEMA,
     )
