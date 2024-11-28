@@ -113,4 +113,13 @@ class AvailableGenome(PlantGenieModel):
 
 
 class AvailableGenomesResponse(PlantGenieModel):
-    results: List[AvailableGenome]
+    genomes: List[AvailableGenome]
+
+
+class AvailableChromosomesRequest(PlantGenieModel):
+    species: str
+    version: str
+
+
+class AvailableChromosomesResponse(PlantGenieModel):
+    chromosomes: List[str]

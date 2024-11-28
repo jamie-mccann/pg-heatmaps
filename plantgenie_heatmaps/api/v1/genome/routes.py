@@ -8,6 +8,8 @@ from fastapi import APIRouter, HTTPException
 
 from plantgenie_heatmaps import DATA_PATH
 from plantgenie_heatmaps.models import (
+    AvailableChromosomesRequest,
+    AvailableChromosomesResponse,
     AvailableGenome,
     AvailableGenomesResponse,
     GenomeSequenceRequest,
@@ -46,14 +48,32 @@ async def get_available_genomes() -> AvailableGenomesResponse:
         p.stem[::-1].split("-", 1)[::-1] for p in PARQUET_GENOMES_PATH.glob("*")
     ]
 
-    # return AvailableGenomesResponse(
-    #     results=[(genome[0][::-1], genome[-1][::-1]) for genome in species_version_prep]
-    # )
     return AvailableGenomesResponse(
-        results=[
+        genomes=[
             AvailableGenome(species=genome[0][::-1], version=genome[-1][::-1])
             for genome in species_version_prep
         ]
+    )
+
+
+@router.post("/genome/list-available-chromosomes")
+async def get_available_chromosomes(
+    request: AvailableChromosomesRequest,
+) -> AvailableChromosomesResponse:
+    # ruff: noqa: F841 reason: queried by duckdb <--> parquet
+    dataset = pyarrow.dataset.dataset(
+        PARQUET_GENOMES_PATH / f"{request.species}-{request.version}",
+        partitioning=FASTA_GENOME_PARTITIONING,
+        schema=FASTA_GENOME_SCHEMA,
+    )
+
+    query = "select distinct(chromosome_id) from dataset order by chromosome_id;"
+
+    with duckdb.connect() as connection:
+        chromosomes = connection.sql(query=query).fetchall()
+
+    return AvailableChromosomesResponse(
+        chromosomes=[chromosome[0] for chromosome in chromosomes]
     )
 
 
@@ -68,7 +88,7 @@ async def get_genomic_sequence(
 
     # ruff: noqa: F841 reason: queried by duckdb <--> parquet
     dataset = pyarrow.dataset.dataset(
-        PARQUET_GENOMES_PATH / request.species,
+        PARQUET_GENOMES_PATH / f"{request.species}-{request.ve}",
         partitioning=FASTA_GENOME_PARTITIONING,
         schema=FASTA_GENOME_SCHEMA,
     )
