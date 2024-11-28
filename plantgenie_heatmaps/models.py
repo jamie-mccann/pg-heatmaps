@@ -88,3 +88,29 @@ class ExpressionResponse(PlantGenieModel):
 
 class GenesResponse(PlantGenieModel):
     results: List[GeneAnnotation]
+
+
+class GenomeRegion(PlantGenieModel):
+    chromosome: str
+
+
+class GenomeSequenceRequest(PlantGenieModel):
+    species: str = Field(description="species to query")
+    version: str = Field(description="genome version for the given species")
+    chromosome: str = Field(description="chromosome to extract")
+    begin: int = Field(description="starting index (inclusive)")
+    end: int = Field(description="ending index (inclusive)")
+
+
+class GenomeSequenceResponse(PlantGenieModel):
+    name: str
+    sequence: str
+
+
+class AvailableGenome(PlantGenieModel):
+    species: str
+    version: str
+
+
+class AvailableGenomesResponse(PlantGenieModel):
+    results: List[AvailableGenome]

@@ -32,3 +32,11 @@ docker run -it -p 8080:80 pg-heatmaps:local-latest
 
 The docker container will expose port 80 where the uvicorn server is running and
 the above run command will map it to your localhost 8080 port.
+
+## Issues
+Currently hosted on goodall on the upsc network. Must either be on eduroam or
+the UMU VPN. On Google Chrome you may have to set:
+
+`--unsafely-treat-insecure-origin-as-secure=<goodall-domain>`
+
+as Chrome may block outgoing requests that result from UI interactions.

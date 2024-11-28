@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import duckdb
@@ -7,6 +6,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
+
+from plantgenie_heatmaps import DATA_PATH
+
+from plantgenie_heatmaps.api.v1.genome.routes import router as genome_router
 
 from plantgenie_heatmaps.models import (
     AnnotationsRequest,
@@ -18,11 +21,11 @@ from plantgenie_heatmaps.models import (
     SampleInfo,
 )
 
-DATA_PATH = (
-    Path(os.environ.get("DATA_PATH")) or Path(__file__).parent.parent / "example_data"
-)
 
 DATABASE_PATH = DATA_PATH / "upsc-plantgenie.db"
+
+PARQUET_SEQUENCE_CHUNK_LENGTH = 1000
+MAX_SEQUENCE_RETURN_LENGTH = 1_000_000  # 1 Megabase
 
 app_path = Path(__file__).parent.parent
 static_files_path = app_path / "react-frontend" / "dist"
@@ -39,25 +42,12 @@ app.add_middleware(
 )
 
 app.mount("/static", StaticFiles(directory=static_files_path), name="static")
+app.include_router(router=genome_router, prefix="/api")
 
 
 @app.get("/", include_in_schema=False)
 async def root():
     return FileResponse(static_files_path / "index.html")
-
-
-# @app.get("/{full_path:path}", include_in_schema=False)
-# async def catch_all(full_path: str):
-#     return FileResponse(static_files_path / "index.html")
-
-# Catch-all route for React (redirect to root for non-API routes)
-@app.get("/{full_path:path}", include_in_schema=False)
-async def catch_all(full_path: str):
-    # If the path starts with "api/", return 404
-    if full_path.startswith("api/"):
-        return {"detail": "Not Found"}, 404
-    # Redirect to root (React will handle routing from `/`)
-    return RedirectResponse(url="/")
 
 @app.get("/api")
 async def api_root():
@@ -67,6 +57,12 @@ async def api_root():
     }
 
     return message
+
+# Catch-all route for React (redirect to root for non-API routes)
+@app.get("/{full_path:path}", include_in_schema=False)
+async def catch_all(full_path: str) -> RedirectResponse:
+    # Redirect to root (React will handle routing from `/`)
+    return RedirectResponse(url="/")
 
 
 @app.post("/api/annotations")
