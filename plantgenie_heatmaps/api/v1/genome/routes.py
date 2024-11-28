@@ -1,5 +1,3 @@
-from typing import Optional
-
 import duckdb
 import pyarrow
 import pyarrow.dataset
