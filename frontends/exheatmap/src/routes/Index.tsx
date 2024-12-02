@@ -43,10 +43,11 @@ const Index = () => {
           Gene Annotations and Selection
         </Typography>
         <Typography variant="body1" component="p" gutterBottom>
-          On the gene annotations and selection page, you can check the genes
-          that you want to include in your heatmap. By default, all genes that
-          have an annotation are selected. Genes with no annotation are
-          disabled.
+          On the gene annotations and selection page, you are presented with a
+          scrollable table (hover over the table and scroll up and down with the
+          mouse) where you can check the genes that you want to include in your
+          heatmap. By default, all genes that have an annotation are selected.
+          Genes with no annotation are disabled.
         </Typography>
 
         {/* Heatmap Generation Instructions */}
@@ -59,6 +60,22 @@ const Index = () => {
           you to the heatmap page and generate an SVG heatmap plot of your
           selected genes' expression based on the species and experiment you
           chose.
+        </Typography>
+
+        {/* Heatmap Modification Instructions */}
+        <Typography variant="h6" component="h6" gutterBottom>
+          Scaling and Clustering the Heatmap
+        </Typography>
+        <Typography variant="body1" component="p" gutterBottom>
+          There are various options for applying scaling and clustering to your
+          selected datasets. The <strong>default</strong> applies clustering on
+          the gene ids (i.e. by row) and base 2 log scaling (with a plus 1 to
+          avoid log(0) errors). You can change these options by clicking the
+          radio button options above the heatmap and the heatmap should change
+          accordingly. The raw unscaled values (in TPM) can be viewed by
+          hovering over a rectangle in the heatmap. A tooltip is shown on hover
+          which provides information about the gene id, sample id and gene
+          expression value for the experiment.
         </Typography>
       </Grid>
     </Paper>
