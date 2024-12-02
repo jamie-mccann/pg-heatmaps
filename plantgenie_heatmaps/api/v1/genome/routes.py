@@ -16,7 +16,6 @@ from plantgenie_heatmaps.models import (
 
 router = APIRouter()
 
-
 PARQUET_GENOMES_PATH = DATA_PATH / "genomes"
 PARQUET_SEQUENCE_CHUNK_LENGTH = 1000
 MAX_SEQUENCE_RETURN_LENGTH = 1_000_000  # 1 Megabase
@@ -75,7 +74,7 @@ async def get_available_chromosomes(
     )
 
 
-@router.post("/genome/sequence")
+@router.post("/genome/get-sequence-region")
 async def get_genomic_sequence(
     request: GenomeSequenceRequest,
 ) -> GenomeSequenceResponse:
@@ -97,12 +96,11 @@ async def get_genomic_sequence(
             (($start_index % $max_chunk_length) + $end_index - $start_index)
         ]
         FROM (
-            SELECT chunk_id, sequence
-            FROM dataset
-            WHERE chromosome_id = $chromosome
-              AND chunk_id >= $start_index // $max_chunk_length
-              AND chunk_id <= $end_index // $max_chunk_length
-            ORDER BY chunk_id
+            SELECT chunk_id, sequence FROM dataset
+                WHERE chromosome_id = $chromosome
+                  AND chunk_id >= $start_index // $max_chunk_length
+                  AND chunk_id <= $end_index // $max_chunk_length
+                ORDER BY chunk_id
         );
     """
 
