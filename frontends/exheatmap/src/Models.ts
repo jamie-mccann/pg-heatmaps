@@ -51,6 +51,9 @@ export const ExperimentTitleToId: { [key: string]: number } = {
   "Pinus sylvestris Cold Stress Needles": 6,
   "Pinus sylvestris Drought Stress Roots": 7,
   "Pinus sylvestris Drought Stress Needles": 8,
+  "Picea abies Somatic Embryogenesis": 9,
+  "Picea abies Zygotic Embryogenesis": 10,
+  "Picea abies ExAtlas": 11,
 };
 
 export interface HeatmapMarginConfig {

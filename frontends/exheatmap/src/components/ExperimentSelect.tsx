@@ -16,6 +16,9 @@ const experimentsBySpecies: { [key: string]: string[] } = {
     "Cold Stress Roots",
     "Drought Stress Needles",
     "Drought Stress Roots",
+    "Somatic Embryogenesis",
+    "Zygotic Embryogenesis",
+    "ExAtlas",
     // these ones are not in the db yet
     // "Seasonal Needles",
     // "Seasonal Wood",
