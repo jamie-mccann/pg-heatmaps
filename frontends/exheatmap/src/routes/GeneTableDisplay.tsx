@@ -47,13 +47,6 @@ const GeneTableDisplay = () => {
       <Button
         variant="contained"
         color="secondary"
-        onClick={() => navigate("/heatmap")}
-      >
-        Heatmap
-      </Button>
-      <Button
-        variant="contained"
-        color="secondary"
         onClick={() => navigate("/responsive-heatmap")}
       >
         Responsive Heatmap
