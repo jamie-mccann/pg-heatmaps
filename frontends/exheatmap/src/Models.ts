@@ -54,6 +54,8 @@ export const ExperimentTitleToId: { [key: string]: number } = {
   "Picea abies Somatic Embryogenesis": 9,
   "Picea abies Zygotic Embryogenesis": 10,
   "Picea abies ExAtlas": 11,
+  "Picea abies Wood Development": 12,
+  "Pinus sylvestris Wood Development": 13,
 };
 
 export interface HeatmapMarginConfig {

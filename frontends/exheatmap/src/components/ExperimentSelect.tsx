@@ -19,6 +19,7 @@ const experimentsBySpecies: { [key: string]: string[] } = {
     "Somatic Embryogenesis",
     "Zygotic Embryogenesis",
     "ExAtlas",
+    "Wood Development",
     // these ones are not in the db yet
     // "Seasonal Needles",
     // "Seasonal Wood",
@@ -28,6 +29,7 @@ const experimentsBySpecies: { [key: string]: string[] } = {
     "Cold Stress Roots",
     "Drought Stress Needles",
     "Drought Stress Roots",
+    "Wood Development",
   ],
   "Populus tremula": [
     // "Light Response Test",
