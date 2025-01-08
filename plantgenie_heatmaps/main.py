@@ -159,8 +159,8 @@ async def get_expression_duckdb(request: ExpressionRequest) -> ExpressionRespons
         }
 
         query = (
-            f"SELECT sample_id, chromosome_id, gene_id, tpm from {experiment} "
-            f"WHERE (chromosome_id, gene_id) IN ({", ".join(["(?, ?)"] * len(gene_ids))})"
+            f"SELECT sample_id, chromosome_id, gene_id, sum(tpm) as tpm from {experiment} "
+            f"WHERE (chromosome_id, gene_id) IN ({", ".join(["(?, ?)"] * len(gene_ids))}) GROUP BY sample_id, chromosome_id, gene_id"
         )
 
         query_relation = connection.sql(
