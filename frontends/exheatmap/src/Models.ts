@@ -56,6 +56,7 @@ export const ExperimentTitleToId: { [key: string]: number } = {
   "Picea abies ExAtlas": 11,
   "Picea abies Wood Development": 12,
   "Pinus sylvestris Wood Development": 13,
+  "Picea abies Light Availability": 14,
 };
 
 export interface HeatmapMarginConfig {

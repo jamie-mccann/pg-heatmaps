@@ -20,6 +20,7 @@ const experimentsBySpecies: { [key: string]: string[] } = {
     "Zygotic Embryogenesis",
     "ExAtlas",
     "Wood Development",
+    "Light Availability"
     // these ones are not in the db yet
     // "Seasonal Needles",
     // "Seasonal Wood",
