@@ -67,7 +67,7 @@ const ResponsiveHeatmap = () => {
     const fetchData = async () => {
       // const url = "http://192.168.0.109:8080/api/expression";
       const url = import.meta.env.PROD
-        ? "http://goodall.upsc.se/api/expression"
+        ? "http://potter.srv.its.umu.se/api/expression"
         : "http://localhost:8080/api/expression";
 
       try {
